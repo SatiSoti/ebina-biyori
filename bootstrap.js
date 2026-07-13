@@ -1,6 +1,7 @@
 (() => {
   const fallbackData = window.EBINA_DATA;
   const fallbackGuideData = window.EBINA_GUIDE_DATA || { version: 1, areas: {} };
+  const fallbackLandmarkData = window.EBINA_CITY_LANDMARKS || { version: 1, source: "static-fallback", items: [] };
   const config = window.EBINA_PUBLIC_CONFIG || {};
   const appRoot = document.querySelector("#app");
   const previewMode = config.previewMode === true || location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
@@ -8,7 +9,8 @@
   const publicBaseGuide = previewMode ? fallbackGuideData : { version: 2, source: "public", areas: {}, statuses: {} };
   window.EBINA_DATA = publicBaseData;
   window.EBINA_GUIDE_DATA = publicBaseGuide;
-  window.EBINA_PUBLIC_STATE = { mode: previewMode ? "demo" : "empty", previewMode, connected: false, publishedCount: 0, guideConnected: false, publishedGuideCount: 0, error: null, guideError: null };
+  window.EBINA_CITY_LANDMARKS = fallbackLandmarkData;
+  window.EBINA_PUBLIC_STATE = { mode: previewMode ? "demo" : "empty", previewMode, connected: false, publishedCount: 0, guideConnected: false, publishedGuideCount: 0, landmarksConnected: false, publishedLandmarkCount: fallbackLandmarkData.items?.length || 0, error: null, guideError: null, landmarksError: null };
 
   const formatDate = (value) => {
     if (!value) return "未設定";
@@ -19,7 +21,7 @@
   const splitBody = (body) => String(body || "").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const loadApp = () => {
     const script = document.createElement("script");
-    script.src = "./app.js?v=landmark-art-16";
+    script.src = "./app.js?v=landmark-registry-17";
     document.body.appendChild(script);
   };
 
@@ -70,6 +72,21 @@
         fetchPublicTable("guide_map_areas", statusParams, controller.signal).catch((error) => { console.warn("[EBINA UPDATE] 案内図の制作状況を取得できませんでした", error); return []; }),
       ]);
       return { places, routes, links, statuses };
+    } finally { clearTimeout(timeout); }
+  };
+
+  const loadPublishedLandmarks = async () => {
+    if (!config.supabaseUrl || !config.supabaseAnonKey) throw new Error("Supabaseの公開設定がありません");
+    const params = new URLSearchParams({
+      select: "id,name,category,description,latitude,longitude,default_zoom,icon_key,color,sort_order,enabled,updated_at",
+      visibility: "eq.published",
+      enabled: "eq.true",
+      order: "sort_order.asc",
+    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    try {
+      return await fetchPublicTable("city_landmarks", params, controller.signal);
     } finally { clearTimeout(timeout); }
   };
 
@@ -208,20 +225,45 @@
     window.EBINA_GUIDE_DATA = { version: 3, source: "supabase", areas, statuses: areaStatuses };
   };
 
-  if (appRoot) appRoot.innerHTML = '<main class="public-loading" aria-live="polite">公開記事と案内図を読み込んでいます…</main>';
-  Promise.allSettled([loadPublishedNews(), loadPublishedGuide()]).then(([newsResult, guideResult]) => {
+  const applyPublishedLandmarks = (rows) => {
+    window.EBINA_CITY_LANDMARKS = {
+      version: 2,
+      source: "supabase",
+      items: rows.map((row) => ({
+        id: String(row.id),
+        name: row.name,
+        category: row.category,
+        description: row.description || "",
+        lat: Number(row.latitude),
+        lng: Number(row.longitude),
+        zoom: Number(row.default_zoom || 14.2),
+        iconKey: row.icon_key || "ebina-station",
+        color: row.color || "#1c3966",
+        sortOrder: Number(row.sort_order || 0),
+        enabled: row.enabled !== false,
+      })),
+    };
+  };
+
+  if (appRoot) appRoot.innerHTML = '<main class="public-loading" aria-live="polite">公開記事・案内図・目印を読み込んでいます…</main>';
+  Promise.allSettled([loadPublishedNews(), loadPublishedGuide(), loadPublishedLandmarks()]).then(([newsResult, guideResult, landmarksResult]) => {
     const newsRows = newsResult.status === "fulfilled" ? newsResult.value : [];
+    const landmarkRows = landmarksResult.status === "fulfilled" ? landmarksResult.value : [];
     if (newsResult.status === "fulfilled" && (newsRows.length || !previewMode)) applyPublishedNews(newsRows);
     if (guideResult.status === "fulfilled") applyPublishedGuide(guideResult.value);
+    if (landmarksResult.status === "fulfilled" && landmarkRows.length) applyPublishedLandmarks(landmarkRows);
     if (newsResult.status === "rejected") console.error("[EBINA UPDATE] 公開記事の読み込みに失敗しました", newsResult.reason);
     if (guideResult.status === "rejected") console.error("[EBINA UPDATE] 公開案内図の読み込みに失敗しました", guideResult.reason);
+    if (landmarksResult.status === "rejected") console.warn("[EBINA UPDATE] 公開目印の読み込みに失敗したため、同梱データを表示します", landmarksResult.reason);
     window.EBINA_PUBLIC_STATE = {
       mode: newsResult.status === "rejected" ? "error" : newsRows.length ? "live" : "empty",
       previewMode,
       connected: newsResult.status === "fulfilled", publishedCount: newsRows.length,
       guideConnected: guideResult.status === "fulfilled", publishedGuideCount: guideResult.status === "fulfilled" ? guideResult.value.places.length : 0,
+      landmarksConnected: landmarksResult.status === "fulfilled", publishedLandmarkCount: landmarkRows.length || fallbackLandmarkData.items?.length || 0,
       error: newsResult.status === "rejected" ? newsResult.reason?.message || "公開記事の取得エラー" : null,
       guideError: guideResult.status === "rejected" ? guideResult.reason?.message || "公開案内図の取得エラー" : null,
+      landmarksError: landmarksResult.status === "rejected" ? landmarksResult.reason?.message || "公開目印の取得エラー" : null,
     };
   }).finally(loadApp);
 })();
