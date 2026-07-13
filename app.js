@@ -82,6 +82,19 @@
     const p = areas.project;
     return { lng: p.lonMin + (svgX - p.offsetX) / (p.cosLat * p.scale), lat: p.latMax - (svgY - p.offsetY) / p.scale };
   };
+  const cityLandmarkIllustration = (id) => {
+    const drawings = {
+      "ebina-station": `<path class="art-ground" d="M8 55c15-3 47-3 64 0"></path><path class="art-paper" d="M13 46V25l13-8 13 8v21m0 0V22l13-7 15 8v23"></path><path class="art-navy" d="M10 25l16-11 16 11-3 4-13-8-13 8zm27-3 15-10 18 10-3 4-15-8-12 8z"></path><path class="art-line" d="M20 46V31h12v15m15 0V29h13v17M8 49h64M16 54h48"></path><rect class="art-blue" x="22" y="33" width="8" height="6" rx="1"></rect><rect class="art-orange" x="49" y="31" width="9" height="6" rx="1"></rect><path class="art-line" d="M25 51v5m29-5v5"></path>`,
+      "ebina-city-hall": `<path class="art-ground" d="M9 56c17-3 45-3 63 0"></path><path class="art-paper" d="M18 51V25h18V11h24v40z"></path><path class="art-green" d="M33 12h30v8H33z"></path><path class="art-line" d="M18 51V25h18V11h24v40M14 51h52M40 17h5m7 0h4M40 25h5m7 0h4M40 33h5m7 0h4M24 31h6m-6 8h6"></path><path class="art-orange" d="M43 51V40h10v11z"></path><path class="art-line" d="M48 11V6m0 0 10 3-10 2"></path>`,
+      "sagami-kokubunji": `<path class="art-ground" d="M7 55c16-4 49-4 66 0"></path><path class="art-orange" d="M35 9h10l-2 6h-6zm-7 12h24l-4 6H32zm-6 13h36l-5 6H27z"></path><path class="art-paper" d="M30 27h20v7H30zm-4 13h28v11H26z"></path><path class="art-line" d="M40 9v42M34 15h12M28 27h24M22 40h36M29 51V40m22 11V40M18 54h44"></path><circle class="art-green" cx="16" cy="45" r="6"></circle><path class="art-line" d="M16 51V39"></path>`,
+      "sagami-sansen-park": `<path class="art-blue" d="M7 49c8-5 14 5 22 0s14 5 22 0 14 5 22 0v9H7z"></path><path class="art-green" d="M10 39c5-13 12-13 17 0zm43 1c5-15 13-15 18 0z"></path><path class="art-paper" d="M24 38h34l-4 7H28z"></path><path class="art-line" d="M18 55c8-5 14 5 22 0s14 5 22 0M24 38h34M28 38c4-12 22-12 26 0M31 38v7m20-7v7M16 39v15m46-14v13"></path><circle class="art-orange" cx="40" cy="17" r="5"></circle><path class="art-line" d="M40 22V9m0 3 5-4"></path>`,
+      "kashiwadai-station": `<path class="art-ground" d="M8 55c17-3 47-3 64 0"></path><path class="art-paper" d="M17 44V18c0-5 5-8 11-8h24c7 0 11 3 11 8v26l-7 8H24z"></path><path class="art-navy" d="M20 18h40v15H20z"></path><rect class="art-blue" x="24" y="21" width="13" height="8" rx="2"></rect><rect class="art-blue" x="43" y="21" width="13" height="8" rx="2"></rect><path class="art-line" d="M17 36h46M25 43h7m16 0h7M28 52l-5 5m29-5 5 5M31 10V6h18v4"></path><circle class="art-orange" cx="27" cy="37" r="2.5"></circle><circle class="art-orange" cx="53" cy="37" r="2.5"></circle>`,
+      "ebina-service-area": `<path class="art-ground" d="M8 55c18-3 47-3 64 0"></path><path class="art-paper" d="M15 49V27h50v22z"></path><path class="art-orange" d="M10 28l8-11h44l8 11z"></path><path class="art-line" d="M15 28h50v21H15M22 49V35h15v14m7-14h14M44 41h14M12 53h56"></path><path class="art-navy" d="M27 21h26v9H27z"></path><path class="art-paper" d="M31 23h18v5H31z"></path><path class="art-line" d="M8 58c9-6 17-6 26 0m12 0c9-6 17-6 26 0"></path>`,
+      "ebina-sports-park": `<path class="art-green" d="M8 45c8-11 18-14 32-14s25 3 32 14v12H8z"></path><path class="art-paper" d="M17 44c8-7 38-7 46 0l-5 9H22z"></path><path class="art-orange" d="M25 45c5-4 25-4 30 0l-3 5H28z"></path><path class="art-line" d="M8 45c8-11 18-14 32-14s25 3 32 14M17 44c8-7 38-7 46 0M22 53h36M13 57h54"></path><path class="art-navy" d="M33 12h14v16H33z"></path><path class="art-line" d="M40 28V9m0 2 12 5-12 4"></path><circle class="art-blue" cx="18" cy="28" r="5"></circle><path class="art-line" d="M18 33V22"></path>`,
+      "kadosawabashi-station": `<path class="art-blue" d="M7 47h66v11H7z"></path><path class="art-paper" d="M13 45c4-16 14-16 18 0 4-16 14-16 18 0 4-16 14-16 18 0z"></path><path class="art-line" d="M8 45h64M13 45c4-16 14-16 18 0 4-16 14-16 18 0 4-16 14-16 18 0M7 53h66"></path><path class="art-navy" d="M21 19h38v13H21z"></path><rect class="art-paper" x="25" y="22" width="9" height="6" rx="1"></rect><rect class="art-paper" x="38" y="22" width="9" height="6" rx="1"></rect><rect class="art-paper" x="51" y="22" width="5" height="6" rx="1"></rect><path class="art-line" d="M18 34h44m-36 0-4 5m32-5 4 5"></path>`,
+    };
+    return `<svg class="city-landmark-art" viewBox="0 0 80 64" aria-hidden="true" focusable="false"><path class="art-shadow" d="M9 58c15 3 47 3 62 0"></path>${drawings[id] || drawings["ebina-station"]}</svg>`;
+  };
   const mapPointColor = (point) => ({ orange: "#c94731", teal: "#155e63", blue: "#326f9a", amber: "#a77a2b" })[point.tone] || "#c94731";
   const mapPointContent = (point) => {
     const [type, id] = String(point.target || "").split("/").filter(Boolean);
@@ -126,7 +139,7 @@
     const keyboardAreaOptions = areas.towns
       .map((town) => `<option value="${esc(String(town.id))}">${esc(town.name)}（${esc(town.base)}エリア）</option>`)
       .join("");
-    const landmarkButtons = CITY_LANDMARKS.map((landmark) => `<button type="button" data-city-landmark="${esc(landmark.id)}" aria-pressed="false"><i style="--landmark-color:${esc(landmark.color)}"></i><span>${esc(landmark.name)}</span><small>${esc(landmark.category)}</small></button>`).join("");
+    const landmarkButtons = CITY_LANDMARKS.map((landmark) => `<button type="button" data-city-landmark="${esc(landmark.id)}" aria-pressed="false"><span class="city-landmark-chip-icon">${cityLandmarkIllustration(landmark.id)}</span><span>${esc(landmark.name)}</span><small>${esc(landmark.category)}</small></button>`).join("");
     const overviewLandmarks = CITY_LANDMARKS.map((landmark) => { const point = projectAreaPoint(landmark); return `<circle data-city-overview-landmark="${esc(landmark.id)}" cx="${point.svgX}" cy="${point.svgY}" r="14" fill="${esc(landmark.color)}"><title>${esc(landmark.name)}</title></circle>`; }).join("");
     return `<div class="interactive-map-layout">
       <div class="interactive-map-main">
@@ -816,6 +829,7 @@
         if (selectedLandmarkId && map.getSource("city-landmarks")) map.setFeatureState({ source: "city-landmarks", id: selectedLandmarkId }, { selected: true });
         document.querySelectorAll("[data-city-landmark]").forEach((button) => { const active = button.dataset.cityLandmark === (id || ""); button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); });
         document.querySelectorAll("[data-city-overview-landmark]").forEach((dot) => dot.classList.toggle("is-active", dot.dataset.cityOverviewLandmark === selectedLandmarkId));
+        document.querySelectorAll("[data-city-landmark-marker]").forEach((marker) => { const active = marker.dataset.cityLandmarkMarker === selectedLandmarkId; marker.classList.toggle("is-selected", active); marker.style.zIndex = active ? "8" : ""; });
       };
       const fitCity = (duration = 650) => {
         if (selectedAreaId && map.getSource("areas")) map.setFeatureState({ source: "areas", id: selectedAreaId }, { selected: false });
@@ -908,6 +922,7 @@
       };
       const updateSemanticLevel = () => {
         const zoom = map.getZoom();
+        container.classList.toggle("is-landmark-detail", zoom >= 14.5);
         if (zoom < 12.35) { levelLabel.textContent = "市全体"; levelHelp.textContent = "町名・地域区分・情報件数"; }
         else if (zoom < 13.6) { levelLabel.textContent = "町丁目"; levelHelp.textContent = "人口・世帯・地域情報"; }
         else if (zoom < 15.2) { levelLabel.textContent = "詳細地図"; levelHelp.textContent = "道路・建物・開発地点"; }
@@ -924,6 +939,17 @@
         window.ebinaRestoreRequested = false;
         window.ebinaRestoreMapOnRender = false;
         try { window.history?.replaceState({ ...(window.history.state || {}), ebinaMapRestore: false }, "", window.location.href); } catch (_) { /* history state is optional in file preview */ }
+        CITY_LANDMARKS.forEach((landmark) => {
+          const element = document.createElement("button");
+          element.type = "button";
+          element.className = "city-landmark-marker";
+          element.dataset.cityLandmarkMarker = landmark.id;
+          element.setAttribute("aria-label", `${landmark.name}へ移動`);
+          element.innerHTML = `<span class="city-landmark-marker-visual"><span class="city-landmark-marker-art">${cityLandmarkIllustration(landmark.id)}</span><span class="city-landmark-marker-name">${esc(landmark.name)}</span></span>`;
+          element.addEventListener("pointerdown", (event) => event.stopPropagation());
+          element.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); jumpToLandmark(landmark); });
+          new maplibregl.Marker({ element, anchor: "bottom", offset: [0, -7] }).setLngLat([landmark.lng, landmark.lat]).addTo(map);
+        });
         refreshHtmlLabels();
         updateOverviewWindow();
         loading.hidden = true;

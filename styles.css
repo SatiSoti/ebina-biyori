@@ -226,13 +226,34 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .city-landmark-strip::-webkit-scrollbar-track { border-radius: 999px; background: #e7ece9; }
 .city-landmark-strip::-webkit-scrollbar-thumb { border-radius: 999px; background: #9bb5ae; }
 .city-landmark-strip > button { display: inline-flex; flex: 0 0 auto; min-height: 44px; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid #d1d9d5; border-radius: 6px; background: #fffef9; color: var(--ink); font: inherit; cursor: pointer; white-space: nowrap; }
-.city-landmark-strip > button i { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; background: var(--landmark-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--landmark-color) 18%, transparent); }
+.city-landmark-chip-icon { display: block; width: 39px; height: 32px; flex: 0 0 39px; }
 .city-landmark-strip > button span { font-size: .69rem; font-weight: 800; }
 .city-landmark-strip > button small { color: var(--ink-soft); font-size: .54rem; }
 .city-landmark-strip > button:hover, .city-landmark-strip > button:focus-visible { border-color: #7eaaa2; background: #f0f7f4; outline: none; }
 .city-landmark-strip > button.is-active { border-color: var(--orange); background: var(--orange-pale); box-shadow: inset 0 -3px 0 var(--orange); }
 .interactive-map-card { position: relative; min-width: 0; height: min(78vh, 820px); min-height: 680px; overflow: hidden; border: 1px solid #bdcec9; border-radius: 8px; background: #f7f3e9; box-shadow: 0 22px 60px rgba(19,38,65,.1); }
 .interactive-map { width: 100%; height: 100%; }
+.city-landmark-art { display: block; width: 100%; height: 100%; overflow: visible; }
+.city-landmark-art .art-line, .city-landmark-art .art-ground { fill: none; stroke: #183252; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.city-landmark-art .art-ground { stroke: #748881; stroke-width: 1.7; stroke-dasharray: 2 2; }
+.city-landmark-art .art-shadow { fill: none; stroke: rgba(24,50,82,.16); stroke-width: 5; stroke-linecap: round; }
+.city-landmark-art .art-paper { fill: #fffdf7; stroke: #183252; stroke-width: 1.8; stroke-linejoin: round; }
+.city-landmark-art .art-navy { fill: #183252; stroke: #183252; stroke-width: 1.2; stroke-linejoin: round; }
+.city-landmark-art .art-blue { fill: #8dbad0; stroke: #183252; stroke-width: 1.25; }
+.city-landmark-art .art-orange { fill: #cf6045; stroke: #183252; stroke-width: 1.25; stroke-linejoin: round; }
+.city-landmark-art .art-green { fill: #a9c7a5; stroke: #183252; stroke-width: 1.25; stroke-linejoin: round; }
+.city-landmark-marker { width: 82px; padding: 0; border: 0; background: transparent; color: #183252; cursor: pointer; font: inherit; filter: drop-shadow(0 3px 3px rgba(24,50,82,.18)); }
+.city-landmark-marker-visual { display: grid; justify-items: center; transform-origin: 50% 100%; transition: transform .18s ease, filter .18s ease; }
+.city-landmark-marker-art { display: block; width: 70px; height: 56px; }
+.city-landmark-marker-name { position: relative; display: block; max-width: 112px; margin-top: -3px; padding: 4px 7px; transform: rotate(-1.5deg); border: 1px solid rgba(24,50,82,.16); border-radius: 2px; background: #cf6045; color: #fffdf7; box-shadow: 2px 2px 0 rgba(24,50,82,.12); font-size: .56rem; font-weight: 900; line-height: 1.25; letter-spacing: .01em; white-space: nowrap; }
+.city-landmark-marker:hover .city-landmark-marker-visual, .city-landmark-marker:focus-visible .city-landmark-marker-visual { transform: translateY(-3px) scale(1.06); }
+.city-landmark-marker:focus-visible { outline: none; }
+.city-landmark-marker:focus-visible .city-landmark-marker-name { outline: 3px solid rgba(201,71,49,.3); outline-offset: 2px; }
+.city-landmark-marker.is-selected .city-landmark-marker-visual { transform: translateY(-5px) scale(1.14); filter: drop-shadow(0 0 6px rgba(255,237,145,.95)); }
+.interactive-map.is-landmark-detail .city-landmark-marker-visual { transform: scale(.78); }
+.interactive-map.is-landmark-detail .city-landmark-marker-name { opacity: 0; }
+.interactive-map.is-landmark-detail .city-landmark-marker:hover .city-landmark-marker-visual, .interactive-map.is-landmark-detail .city-landmark-marker:focus-visible .city-landmark-marker-visual, .interactive-map.is-landmark-detail .city-landmark-marker.is-selected .city-landmark-marker-visual { transform: translateY(-2px) scale(.9); }
+.interactive-map.is-landmark-detail .city-landmark-marker:hover .city-landmark-marker-name, .interactive-map.is-landmark-detail .city-landmark-marker:focus-visible .city-landmark-marker-name, .interactive-map.is-landmark-detail .city-landmark-marker.is-selected .city-landmark-marker-name { opacity: 1; }
 .city-overview-map { position: absolute; z-index: 7; right: 11px; bottom: 48px; display: grid; width: 132px; gap: 5px; padding: 7px; border: 1px solid #9fada8; border-radius: 7px; background: rgba(255,254,249,.96); box-shadow: 0 7px 22px rgba(19,38,65,.18); }
 .city-overview-map > strong { color: var(--ink); font-size: .57rem; letter-spacing: .08em; }
 .city-overview-map svg { display: block; width: 100%; aspect-ratio: 7 / 9; border: 1px solid #d5dcd8; background: #edf3f0; cursor: crosshair; touch-action: none; user-select: none; }
@@ -775,6 +796,10 @@ textarea.form-control { min-height: 150px; resize: vertical; }
   .city-landmark-nav { grid-template-columns: 40px minmax(0, 1fr) 40px; gap: 4px; padding: 4px; }
   .city-landmark-scroll { width: 40px; min-height: 44px; }
   .city-landmark-strip > button { padding: 7px 9px; }
+  .city-landmark-chip-icon { width: 34px; height: 28px; flex-basis: 34px; }
+  .city-landmark-marker { width: 68px; }
+  .city-landmark-marker-art { width: 58px; height: 47px; }
+  .city-landmark-marker-name { max-width: 94px; padding: 3px 5px; font-size: .5rem; }
   .interactive-map-card { height: 560px; min-height: 560px; border-radius: 5px; }
   .interactive-map-detail { padding: 24px 19px; }
   .interactive-map-level { top: 8px; right: 8px; }
