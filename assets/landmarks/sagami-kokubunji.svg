@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64">
+  <title>史跡相模国分寺跡</title>
+  <style>
+    .art-line,.art-ground{fill:none;stroke:#183252;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}.art-ground{stroke:#748881;stroke-width:1.7;stroke-dasharray:2 2}.art-shadow{fill:none;stroke:rgba(24,50,82,.16);stroke-width:5;stroke-linecap:round}.art-paper{fill:#fffdf7;stroke:#183252;stroke-width:1.8;stroke-linejoin:round}.art-navy{fill:#183252;stroke:#183252;stroke-width:1.2;stroke-linejoin:round}.art-blue{fill:#8dbad0;stroke:#183252;stroke-width:1.25}.art-orange{fill:#cf6045;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}.art-green{fill:#a9c7a5;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}
+  </style>
+  <path class="art-shadow" d="M9 58c15 3 47 3 62 0"/>
+  <path class="art-ground" d="M7 55c16-4 49-4 66 0"/>
+  <path class="art-orange" d="M35 9h10l-2 6h-6zm-7 12h24l-4 6H32zm-6 13h36l-5 6H27z"/>
+  <path class="art-paper" d="M30 27h20v7H30zm-4 13h28v11H26z"/>
+  <path class="art-line" d="M40 9v42M34 15h12M28 27h24M22 40h36M29 51V40m22 11V40M18 54h44"/>
+  <circle class="art-green" cx="16" cy="45" r="6"/>
+  <path class="art-line" d="M16 51V39"/>
+</svg>

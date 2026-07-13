@@ -21,7 +21,7 @@
   const splitBody = (body) => String(body || "").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const loadApp = () => {
     const script = document.createElement("script");
-    script.src = "./app.js?v=landmark-registry-17";
+    script.src = "./app.js?v=landmark-assets-18";
     document.body.appendChild(script);
   };
 
@@ -78,7 +78,7 @@
   const loadPublishedLandmarks = async () => {
     if (!config.supabaseUrl || !config.supabaseAnonKey) throw new Error("Supabaseの公開設定がありません");
     const params = new URLSearchParams({
-      select: "id,name,category,description,latitude,longitude,default_zoom,icon_key,color,sort_order,enabled,updated_at",
+      select: "id,name,category,description,latitude,longitude,default_zoom,image_path,color,sort_order,enabled,updated_at",
       visibility: "eq.published",
       enabled: "eq.true",
       order: "sort_order.asc",
@@ -237,7 +237,7 @@
         lat: Number(row.latitude),
         lng: Number(row.longitude),
         zoom: Number(row.default_zoom || 14.2),
-        iconKey: row.icon_key || "ebina-station",
+        imagePath: row.image_path || "ebina-station.svg",
         color: row.color || "#1c3966",
         sortOrder: Number(row.sort_order || 0),
         enabled: row.enabled !== false,

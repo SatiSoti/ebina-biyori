@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64">
+  <title>海老名運動公園</title>
+  <style>
+    .art-line,.art-ground{fill:none;stroke:#183252;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}.art-ground{stroke:#748881;stroke-width:1.7;stroke-dasharray:2 2}.art-shadow{fill:none;stroke:rgba(24,50,82,.16);stroke-width:5;stroke-linecap:round}.art-paper{fill:#fffdf7;stroke:#183252;stroke-width:1.8;stroke-linejoin:round}.art-navy{fill:#183252;stroke:#183252;stroke-width:1.2;stroke-linejoin:round}.art-blue{fill:#8dbad0;stroke:#183252;stroke-width:1.25}.art-orange{fill:#cf6045;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}.art-green{fill:#a9c7a5;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}
+  </style>
+  <path class="art-shadow" d="M9 58c15 3 47 3 62 0"/>
+  <path class="art-green" d="M8 45c8-11 18-14 32-14s25 3 32 14v12H8z"/>
+  <path class="art-paper" d="M17 44c8-7 38-7 46 0l-5 9H22z"/>
+  <path class="art-orange" d="M25 45c5-4 25-4 30 0l-3 5H28z"/>
+  <path class="art-line" d="M8 45c8-11 18-14 32-14s25 3 32 14M17 44c8-7 38-7 46 0M22 53h36M13 57h54"/>
+  <path class="art-navy" d="M33 12h14v16H33z"/>
+  <path class="art-line" d="M40 28V9m0 2 12 5-12 4"/>
+  <circle class="art-blue" cx="18" cy="28" r="5"/>
+  <path class="art-line" d="M18 33V22"/>
+</svg>

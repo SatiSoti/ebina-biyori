@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64">
+  <title>海老名市役所</title>
+  <style>
+    .art-line,.art-ground{fill:none;stroke:#183252;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}.art-ground{stroke:#748881;stroke-width:1.7;stroke-dasharray:2 2}.art-shadow{fill:none;stroke:rgba(24,50,82,.16);stroke-width:5;stroke-linecap:round}.art-paper{fill:#fffdf7;stroke:#183252;stroke-width:1.8;stroke-linejoin:round}.art-navy{fill:#183252;stroke:#183252;stroke-width:1.2;stroke-linejoin:round}.art-blue{fill:#8dbad0;stroke:#183252;stroke-width:1.25}.art-orange{fill:#cf6045;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}.art-green{fill:#a9c7a5;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}
+  </style>
+  <path class="art-shadow" d="M9 58c15 3 47 3 62 0"/>
+  <path class="art-ground" d="M9 56c17-3 45-3 63 0"/>
+  <path class="art-paper" d="M18 51V25h18V11h24v40z"/>
+  <path class="art-green" d="M33 12h30v8H33z"/>
+  <path class="art-line" d="M18 51V25h18V11h24v40M14 51h52M40 17h5m7 0h4M40 25h5m7 0h4M40 33h5m7 0h4M24 31h6m-6 8h6"/>
+  <path class="art-orange" d="M43 51V40h10v11z"/>
+  <path class="art-line" d="M48 11V6m0 0 10 3-10 2"/>
+</svg>

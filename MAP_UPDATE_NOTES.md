@@ -41,10 +41,13 @@
 ランドマークは、変更内容ごとに次のファイルへ分けています。
 
 - `city-landmarks-data.js`：Supabaseを使えないときに表示する8件の予備データ
-- `city-landmark-icons.js`：手描きSVGのイラスト集。`iconKey` で選択
+- `assets/landmarks/`：1地点1ファイルのランドマーク画像。SVG・PNG・WebPに対応
 - `city-landmarks.css`：イラスト、目印ジャンプ、ミニ全体図の見た目
 - `app.js`：上記データを地図へ描画する共通処理
+- `landmark-assets.html`：現在の全イラストを大きく確認する素材一覧
 
-通常の名称・座標・並び順・公開状態の変更は、Supabaseの `city_landmarks` だけを更新します。SVG本体はSupabaseへ保存しません。新しい絵柄を追加するときだけ `city-landmark-icons.js` に登録し、そのキーを台帳の `icon_key` に入力します。
+通常の名称・座標・並び順・公開状態の変更は、Supabaseの `city_landmarks` だけを更新します。画像本体はSupabaseへ保存しません。新しい絵柄を追加するときは `assets/landmarks/` に保存し、台帳の `image_path` にファイル名を入力します。同名ファイルの差し替えなら台帳の変更は不要です。
+
+画像ファイル名は半角英小文字・数字・ハイフンを使い、拡張子は `.svg`、`.png`、`.webp` のいずれかにします。全素材は `landmark-assets.html` で一覧確認できます。
 
 Supabaseのテーブルが未導入、空、または一時的に取得できない場合は、`city-landmarks-data.js` の予備データを表示します。

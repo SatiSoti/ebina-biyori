@@ -18,7 +18,11 @@
   const categoryMap = Object.fromEntries(data.categories.map((c) => [c.id, c.label]));
   const MAP_STATE_KEY = "ebina-update-map-state-v1";
   const MAP_GUIDE_KEY = "ebina-update-map-guide-seen-v1";
-  const landmarkRegistry = window.EBINA_LANDMARK_ICONS || {};
+  const LANDMARK_ASSET_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*\.(?:svg|png|webp)$/;
+  const landmarkAssetFile = (value) => {
+    const file = String(value || "").split(/[\\/]/).at(-1);
+    return LANDMARK_ASSET_PATTERN.test(file) ? file : "ebina-station.svg";
+  };
   const rawLandmarks = Array.isArray(window.EBINA_CITY_LANDMARKS)
     ? window.EBINA_CITY_LANDMARKS
     : window.EBINA_CITY_LANDMARKS?.items || [];
@@ -27,7 +31,7 @@
     .map((landmark, index) => ({
       ...landmark,
       id: String(landmark.id || ""),
-      iconKey: String(landmark.iconKey || landmark.id || "ebina-station"),
+      imagePath: landmarkAssetFile(landmark.imagePath || `${landmark.id}.svg`),
       lng: Number(landmark.lng),
       lat: Number(landmark.lat),
       zoom: Number(landmark.zoom || 14.2),
@@ -90,7 +94,7 @@
     const p = areas.project;
     return { lng: p.lonMin + (svgX - p.offsetX) / (p.cosLat * p.scale), lat: p.latMax - (svgY - p.offsetY) / p.scale };
   };
-  const cityLandmarkIllustration = (iconKey) => landmarkRegistry.render?.(iconKey) || "";
+  const cityLandmarkIllustration = (imagePath) => `<img class="city-landmark-art" src="./assets/landmarks/${esc(landmarkAssetFile(imagePath))}" alt="" decoding="async" draggable="false">`;
   const mapPointColor = (point) => ({ orange: "#c94731", teal: "#155e63", blue: "#326f9a", amber: "#a77a2b" })[point.tone] || "#c94731";
   const mapPointContent = (point) => {
     const [type, id] = String(point.target || "").split("/").filter(Boolean);
@@ -135,7 +139,7 @@
     const keyboardAreaOptions = areas.towns
       .map((town) => `<option value="${esc(String(town.id))}">${esc(town.name)}（${esc(town.base)}エリア）</option>`)
       .join("");
-    const landmarkButtons = CITY_LANDMARKS.map((landmark) => `<button type="button" data-city-landmark="${esc(landmark.id)}" aria-pressed="false"><span class="city-landmark-chip-icon">${cityLandmarkIllustration(landmark.iconKey)}</span><span>${esc(landmark.name)}</span><small>${esc(landmark.category)}</small></button>`).join("");
+    const landmarkButtons = CITY_LANDMARKS.map((landmark) => `<button type="button" data-city-landmark="${esc(landmark.id)}" aria-pressed="false"><span class="city-landmark-chip-icon">${cityLandmarkIllustration(landmark.imagePath)}</span><span>${esc(landmark.name)}</span><small>${esc(landmark.category)}</small></button>`).join("");
     const overviewLandmarks = CITY_LANDMARKS.map((landmark) => { const point = projectAreaPoint(landmark); return `<circle data-city-overview-landmark="${esc(landmark.id)}" cx="${point.svgX}" cy="${point.svgY}" r="14" fill="${esc(landmark.color)}"><title>${esc(landmark.name)}</title></circle>`; }).join("");
     return `<div class="interactive-map-layout">
       <div class="interactive-map-main">
@@ -157,6 +161,7 @@
         <p class="eyebrow">INTERACTIVE MAP</p><h2>海老名市を選んで見る</h2><p>町を選ぶと滑らかに拡大します。さらに拡大すると、丁目、道路・建物、地点情報が順に表示されます。</p>
         <div class="map-detail-guide"><span><b>1</b>市全体</span><span><b>2</b>町丁目</span><span><b>3</b>道路・建物</span><span><b>4</b>地点詳細</span></div>
         <div class="map-detail-summary"><strong>掲載地点 ${data.mapItems.length + data.mapPoints.length}件</strong><small>${previewMode ? "画面確認用の情報を含みます" : "公開済みの地点情報を表示しています"}</small></div>
+        ${previewMode ? `<a class="map-area-tip-link" href="./landmark-assets.html" target="_blank" rel="noopener">編集用：ランドマーク素材一覧を開く →</a>` : ""}
         <div class="map-keyboard-areas"><label for="map-area-select">キーボードで町丁目を選ぶ</label><select id="map-area-select" data-keyboard-area-select><option value="">町丁目を選択してください</option>${keyboardAreaOptions}</select><button class="button" type="button" data-keyboard-area-open>選択した地域を詳しく見る</button></div>
       </aside>
     </div>`;
@@ -941,7 +946,7 @@
           element.className = "city-landmark-marker";
           element.dataset.cityLandmarkMarker = landmark.id;
           element.setAttribute("aria-label", `${landmark.name}へ移動`);
-          element.innerHTML = `<span class="city-landmark-marker-visual"><span class="city-landmark-marker-art">${cityLandmarkIllustration(landmark.iconKey)}</span><span class="city-landmark-marker-name">${esc(landmark.name)}</span></span>`;
+          element.innerHTML = `<span class="city-landmark-marker-visual"><span class="city-landmark-marker-art">${cityLandmarkIllustration(landmark.imagePath)}</span><span class="city-landmark-marker-name">${esc(landmark.name)}</span></span>`;
           element.addEventListener("pointerdown", (event) => event.stopPropagation());
           element.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); jumpToLandmark(landmark); });
           new maplibregl.Marker({ element, anchor: "bottom", offset: [0, -7] }).setLngLat([landmark.lng, landmark.lat]).addTo(map);

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64">
+  <title>かしわ台駅</title>
+  <style>
+    .art-line,.art-ground{fill:none;stroke:#183252;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}.art-ground{stroke:#748881;stroke-width:1.7;stroke-dasharray:2 2}.art-shadow{fill:none;stroke:rgba(24,50,82,.16);stroke-width:5;stroke-linecap:round}.art-paper{fill:#fffdf7;stroke:#183252;stroke-width:1.8;stroke-linejoin:round}.art-navy{fill:#183252;stroke:#183252;stroke-width:1.2;stroke-linejoin:round}.art-blue{fill:#8dbad0;stroke:#183252;stroke-width:1.25}.art-orange{fill:#cf6045;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}.art-green{fill:#a9c7a5;stroke:#183252;stroke-width:1.25;stroke-linejoin:round}
+  </style>
+  <path class="art-shadow" d="M9 58c15 3 47 3 62 0"/>
+  <path class="art-ground" d="M8 55c17-3 47-3 64 0"/>
+  <path class="art-paper" d="M17 44V18c0-5 5-8 11-8h24c7 0 11 3 11 8v26l-7 8H24z"/>
+  <path class="art-navy" d="M20 18h40v15H20z"/>
+  <rect class="art-blue" x="24" y="21" width="13" height="8" rx="2"/>
+  <rect class="art-blue" x="43" y="21" width="13" height="8" rx="2"/>
+  <path class="art-line" d="M17 36h46M25 43h7m16 0h7M28 52l-5 5m29-5 5 5M31 10V6h18v4"/>
+  <circle class="art-orange" cx="27" cy="37" r="2.5"/>
+  <circle class="art-orange" cx="53" cy="37" r="2.5"/>
+</svg>
