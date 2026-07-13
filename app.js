@@ -161,7 +161,6 @@
         <p class="eyebrow">INTERACTIVE MAP</p><h2>海老名市を選んで見る</h2><p>町を選ぶと滑らかに拡大します。さらに拡大すると、丁目、道路・建物、地点情報が順に表示されます。</p>
         <div class="map-detail-guide"><span><b>1</b>市全体</span><span><b>2</b>町丁目</span><span><b>3</b>道路・建物</span><span><b>4</b>地点詳細</span></div>
         <div class="map-detail-summary"><strong>掲載地点 ${data.mapItems.length + data.mapPoints.length}件</strong><small>${previewMode ? "画面確認用の情報を含みます" : "公開済みの地点情報を表示しています"}</small></div>
-        ${previewMode ? `<a class="map-area-tip-link" href="./landmark-assets.html" target="_blank" rel="noopener">編集用：ランドマーク素材一覧を開く →</a>` : ""}
         <div class="map-keyboard-areas"><label for="map-area-select">キーボードで町丁目を選ぶ</label><select id="map-area-select" data-keyboard-area-select><option value="">町丁目を選択してください</option>${keyboardAreaOptions}</select><button class="button" type="button" data-keyboard-area-open>選択した地域を詳しく見る</button></div>
       </aside>
     </div>`;

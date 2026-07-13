@@ -21,7 +21,7 @@
   const splitBody = (body) => String(body || "").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const loadApp = () => {
     const script = document.createElement("script");
-    script.src = "./app.js?v=landmark-assets-18";
+    script.src = "./app.js?v=landmark-private-19";
     document.body.appendChild(script);
   };
 
