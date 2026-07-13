@@ -21,7 +21,7 @@
   const splitBody = (body) => String(body || "").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const loadApp = () => {
     const script = document.createElement("script");
-    script.src = "./app.js?v=landmark-private-19";
+    script.src = "./app.js?v=guide-illustrations-20";
     document.body.appendChild(script);
   };
 
@@ -198,7 +198,7 @@
           lat: row.entrance_latitude == null ? Number(row.latitude) : Number(row.entrance_latitude),
           lng: row.entrance_longitude == null ? Number(row.longitude) : Number(row.entrance_longitude),
         },
-        shape: publicPlaceShape(row), icon: row.icon || "place", accessDescription: row.access_description || "",
+        shape: publicPlaceShape(row), icon: row.icon || "place", illustrationPath: row.shape_geojson?.properties?.illustrationPath || "", accessDescription: row.access_description || "",
         nearestTransit: Array.isArray(row.nearest_transit) ? row.nearest_transit : [],
         relatedNewsIds: relatedNewsByPlace.get(String(row.id)) || [], visibility: "published",
         routeId: firstRoute ? String(firstRoute.id) : null,

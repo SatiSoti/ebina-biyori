@@ -19,9 +19,12 @@
   const MAP_STATE_KEY = "ebina-update-map-state-v1";
   const MAP_GUIDE_KEY = "ebina-update-map-guide-seen-v1";
   const LANDMARK_ASSET_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*\.(?:svg|png|webp)$/;
-  const landmarkAssetFile = (value) => {
+  const optionalLandmarkAssetFile = (value) => {
     const file = String(value || "").split(/[\\/]/).at(-1);
-    return LANDMARK_ASSET_PATTERN.test(file) ? file : "ebina-station.svg";
+    return LANDMARK_ASSET_PATTERN.test(file) ? file : "";
+  };
+  const landmarkAssetFile = (value) => {
+    return optionalLandmarkAssetFile(value) || "ebina-station.svg";
   };
   const rawLandmarks = Array.isArray(window.EBINA_CITY_LANDMARKS)
     ? window.EBINA_CITY_LANDMARKS
@@ -95,6 +98,10 @@
     return { lng: p.lonMin + (svgX - p.offsetX) / (p.cosLat * p.scale), lat: p.latMax - (svgY - p.offsetY) / p.scale };
   };
   const cityLandmarkIllustration = (imagePath) => `<img class="city-landmark-art" src="./assets/landmarks/${esc(landmarkAssetFile(imagePath))}" alt="" decoding="async" draggable="false">`;
+  const guidePlaceIllustration = (imagePath, alt = "") => {
+    const file = optionalLandmarkAssetFile(imagePath);
+    return file ? `<img class="guide-place-illustration" src="./assets/landmarks/${esc(file)}" alt="${esc(alt)}" decoding="async" draggable="false">` : "";
+  };
   const mapPointColor = (point) => ({ orange: "#c94731", teal: "#155e63", blue: "#326f9a", amber: "#a77a2b" })[point.tone] || "#c94731";
   const mapPointContent = (point) => {
     const [type, id] = String(point.target || "").split("/").filter(Boolean);
@@ -1233,7 +1240,7 @@
         const relatedArticleMarkup = articles.length ? `<div class="guide-place-articles"><strong>この場所に紐づく関連記事</strong>${articleLinks(articles, "")}</div>` : "";
         const demoLabel = place.status === "demo" ? `<span class="map-detail-demo">デモ登録</span>` : "";
         if (guideDetail) {
-          guideDetail.innerHTML = `<button class="guide-card-close" type="button" data-guide-card-close aria-label="場所の詳細を閉じる">×</button><p class="eyebrow">REGISTERED PLACE</p>${demoLabel}<div class="guide-card-title"><span class="guide-card-icon">${guideIconMarkup(place.type)}</span><h3>${esc(place.name)}</h3></div><p class="guide-place-address">${esc(place.address)}</p><dl class="guide-place-meta"><div><dt>種類</dt><dd>${esc(guidePlaceType[place.type] || place.type)}</dd></div><div><dt>状態</dt><dd>${esc(place.status)}</dd></div><div><dt>最寄り</dt><dd>${esc((place.nearestTransit || []).join("・") || "未設定")}</dd></div></dl><p>${esc(place.accessDescription || "アクセス情報は準備中です。")}</p>${route ? `<div class="guide-route-note"><strong>${esc(route.name)}</strong><span>${esc(route.description || "編集部おすすめの案内経路です。")}</span></div>${route.externalMapUrl ? `<a class="button guide-external-route" href="${esc(route.externalMapUrl)}" target="_blank" rel="noopener">外部地図で経路を開く</a>` : ""}` : ""}${facilityMarkup}${relatedArticleMarkup}`;
+          guideDetail.innerHTML = `<button class="guide-card-close" type="button" data-guide-card-close aria-label="場所の詳細を閉じる">×</button><p class="eyebrow">REGISTERED PLACE</p>${demoLabel}<div class="guide-card-title ${optionalLandmarkAssetFile(place.illustrationPath) ? "has-illustration" : ""}">${optionalLandmarkAssetFile(place.illustrationPath) ? guidePlaceIllustration(place.illustrationPath, place.name) : `<span class="guide-card-icon">${guideIconMarkup(place.type)}</span>`}<h3>${esc(place.name)}</h3></div><p class="guide-place-address">${esc(place.address)}</p><dl class="guide-place-meta"><div><dt>種類</dt><dd>${esc(guidePlaceType[place.type] || place.type)}</dd></div><div><dt>状態</dt><dd>${esc(place.status)}</dd></div><div><dt>最寄り</dt><dd>${esc((place.nearestTransit || []).join("・") || "未設定")}</dd></div></dl><p>${esc(place.accessDescription || "アクセス情報は準備中です。")}</p>${route ? `<div class="guide-route-note"><strong>${esc(route.name)}</strong><span>${esc(route.description || "編集部おすすめの案内経路です。")}</span></div>${route.externalMapUrl ? `<a class="button guide-external-route" href="${esc(route.externalMapUrl)}" target="_blank" rel="noopener">外部地図で経路を開く</a>` : ""}` : ""}${facilityMarkup}${relatedArticleMarkup}`;
           guideDetail.querySelector("[data-guide-card-close]")?.addEventListener("click", clearGuideSelection);
         }
         map.easeTo({ center: [place.entrancePosition.lng, place.entrancePosition.lat], zoom: Math.max(map.getZoom(), 16.7), duration: 500 });
@@ -1255,8 +1262,9 @@
           guidePlaces.forEach((place) => {
             const element = document.createElement("button");
             element.type = "button";
-            element.className = `guide-map-marker guide-map-marker--place${place.status === "demo" ? " is-demo" : ""}${place.labelMode === "interactive" ? " is-label-interactive" : ""}`;
-            element.innerHTML = `<span class="guide-marker-icon">${guideIconMarkup(place.type)}</span><span class="guide-marker-name">${esc(place.name)}</span>`;
+            const hasIllustration = Boolean(optionalLandmarkAssetFile(place.illustrationPath));
+            element.className = `guide-map-marker guide-map-marker--place${hasIllustration ? " has-illustration" : ""}${place.status === "demo" ? " is-demo" : ""}${place.labelMode === "interactive" && !hasIllustration ? " is-label-interactive" : ""}`;
+            element.innerHTML = hasIllustration ? `<span class="guide-marker-illustration">${guidePlaceIllustration(place.illustrationPath)}</span><span class="guide-marker-name">${esc(place.name)}</span>` : `<span class="guide-marker-icon">${guideIconMarkup(place.type)}</span><span class="guide-marker-name">${esc(place.name)}</span>`;
             element.setAttribute("aria-label", `${place.name}の案内を見る`);
             element.addEventListener("click", () => showGuidePlace(place));
             const savedOffset = Array.isArray(place.labelOffset) && place.labelOffset.some((value) => Number(value) !== 0) ? place.labelOffset.map(Number) : null;
