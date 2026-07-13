@@ -13,6 +13,7 @@
 .city-landmark-strip > button:hover, .city-landmark-strip > button:focus-visible { border-color: #7eaaa2; background: #f0f7f4; outline: none; }
 .city-landmark-strip > button.is-active { border-color: var(--orange); background: var(--orange-pale); box-shadow: inset 0 -3px 0 var(--orange); }
 .city-landmark-art { display: block; width: 100%; height: 100%; object-fit: contain; overflow: visible; }
+.city-landmark-art[src*="watercolor-"] { filter: contrast(1.14) saturate(1.1) drop-shadow(0 2px 2px rgba(24,50,82,.28)); }
 .city-landmark-marker { width: 82px; padding: 0; border: 0; background: transparent; color: #183252; cursor: pointer; font: inherit; filter: drop-shadow(0 3px 3px rgba(24,50,82,.18)); }
 .city-landmark-marker-visual { display: grid; justify-items: center; transform-origin: 50% 100%; transition: transform .18s ease, filter .18s ease; }
 .city-landmark-marker-art { display: block; width: 70px; height: 56px; }
