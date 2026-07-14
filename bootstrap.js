@@ -21,7 +21,7 @@
   const splitBody = (body) => String(body || "").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const loadApp = () => {
     const script = document.createElement("script");
-    script.src = "/app.js?v=pathname-routing-1";
+    script.src = "/app.js?v=pathname-routing-2";
     document.body.appendChild(script);
   };
 
