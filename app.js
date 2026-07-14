@@ -3,9 +3,11 @@
   const areas = window.EBINA_AREAS;
   const guideData = window.EBINA_GUIDE_DATA || { areas: {} };
   const publicConfig = window.EBINA_PUBLIC_CONFIG || {};
+  const router = window.EBINA_ROUTER;
   const publicState = window.EBINA_PUBLIC_STATE || { mode: "demo", connected: false, publishedCount: 0 };
   const previewMode = publicState.previewMode !== false;
   const liveNews = publicState.mode === "live";
+  const liveFollowups = publicState.followupsConnected === true;
   const liveGuide = publicState.guideConnected === true;
   const issuesEnabled = false;
   if (!issuesEnabled) {
@@ -86,7 +88,7 @@
   const cityPointsForBase = (base) => data.mapPoints.filter((point) => point.town === base);
 
   const esc = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
-  const href = (path) => `#${path}`;
+  const href = (path) => router.href(path);
   const projectAreaPoint = (point) => {
     const p = areas.project;
     const x = p.offsetX + (point.lng - p.lonMin) * p.cosLat * p.scale;
@@ -97,10 +99,10 @@
     const p = areas.project;
     return { lng: p.lonMin + (svgX - p.offsetX) / (p.cosLat * p.scale), lat: p.latMax - (svgY - p.offsetY) / p.scale };
   };
-  const cityLandmarkIllustration = (imagePath) => `<img class="city-landmark-art" src="./assets/landmarks/${esc(landmarkAssetFile(imagePath))}" alt="" decoding="async" draggable="false">`;
+  const cityLandmarkIllustration = (imagePath) => `<img class="city-landmark-art" src="/assets/landmarks/${esc(landmarkAssetFile(imagePath))}" alt="" decoding="async" draggable="false">`;
   const guidePlaceIllustration = (imagePath, alt = "") => {
     const file = optionalLandmarkAssetFile(imagePath);
-    return file ? `<img class="guide-place-illustration" src="./assets/landmarks/${esc(file)}" alt="${esc(alt)}" decoding="async" draggable="false">` : "";
+    return file ? `<img class="guide-place-illustration" src="/assets/landmarks/${esc(file)}" alt="${esc(alt)}" decoding="async" draggable="false">` : "";
   };
   const mapPointColor = (point) => ({ orange: "#c94731", teal: "#155e63", blue: "#326f9a", amber: "#a77a2b" })[point.tone] || "#c94731";
   const mapPointContent = (point) => {
@@ -135,7 +137,7 @@
     data.mapPoints.forEach((point) => { counts[point.town] = (counts[point.town] || 0) + 1; });
     if (compact) {
       const markers = data.mapPoints.map((newsPoint) => { const point = projectAreaPoint(newsPoint); return `<a href="${href(newsPoint.target)}" aria-label="${esc(newsPoint.area)}の${esc(newsPoint.label)}を開く"><title>${esc(newsPoint.area)}：${esc(newsPoint.label)}</title><circle class="home-town-marker-halo" cx="${point.svgX}" cy="${point.svgY}" r="10" style="--item-color:${mapPointColor(newsPoint)}"></circle><circle class="home-town-marker" cx="${point.svgX}" cy="${point.svgY}" r="5" style="--item-color:${mapPointColor(newsPoint)}"></circle></a>`; }).join("");
-      return `<div class="map-experience map-experience--compact"><div class="map-canvas home-town-map" data-home-town-map-link role="link" tabindex="0" aria-label="町丁目マップを開く"><svg class="home-town-svg" viewBox="${esc(areas.viewBox)}" role="img" aria-label="海老名市の主要地域とニュース地点"><rect class="home-town-paper" width="700" height="900"></rect><g class="home-town-regions">${areas.towns.map((town) => `<path d="${esc(town.d)}" class="${cityPointsForBase(town.base).length ? "has-update" : ""}"><title>${esc(town.name)}</title></path>`).join("")}</g><path class="home-town-outline" d="${esc(areas.outline)}"></path><g class="home-town-labels">${areas.labels.map((label) => `<g transform="translate(${label.x} ${label.y})"><text text-anchor="middle" style="font-size:${Math.max(10, Number(label.size || 12))}px">${esc(label.name)}</text>${counts[label.name] ? `<text class="home-town-count" y="13" text-anchor="middle">情報 ${counts[label.name]}件</text>` : ""}</g>`).join("")}</g><g class="home-town-markers">${markers}</g></svg><span class="map-caption">海老名市町丁目データを使った軽量概念図</span></div><div class="map-side"><p class="eyebrow">DISCOVER</p><h3>場所から、<br>海老名の変化を見つける。</h3><p>駅前の計画も、暮らしの変化も。町丁目から気になる動きをたどれます。</p><a class="button button--orange" href="#/map">町丁目マップをひらく</a></div></div>`;
+      return `<div class="map-experience map-experience--compact"><div class="map-canvas home-town-map" data-home-town-map-link role="link" tabindex="0" aria-label="町丁目マップを開く"><svg class="home-town-svg" viewBox="${esc(areas.viewBox)}" role="img" aria-label="海老名市の主要地域とニュース地点"><rect class="home-town-paper" width="700" height="900"></rect><g class="home-town-regions">${areas.towns.map((town) => `<path d="${esc(town.d)}" class="${cityPointsForBase(town.base).length ? "has-update" : ""}"><title>${esc(town.name)}</title></path>`).join("")}</g><path class="home-town-outline" d="${esc(areas.outline)}"></path><g class="home-town-labels">${areas.labels.map((label) => `<g transform="translate(${label.x} ${label.y})"><text text-anchor="middle" style="font-size:${Math.max(10, Number(label.size || 12))}px">${esc(label.name)}</text>${counts[label.name] ? `<text class="home-town-count" y="13" text-anchor="middle">情報 ${counts[label.name]}件</text>` : ""}</g>`).join("")}</g><g class="home-town-markers">${markers}</g></svg><span class="map-caption">海老名市町丁目データを使った軽量概念図</span></div><div class="map-side"><p class="eyebrow">DISCOVER</p><h3>場所から、<br>海老名の変化を見つける。</h3><p>駅前の計画も、暮らしの変化も。町丁目から気になる動きをたどれます。</p><a class="button button--orange" href="/map">町丁目マップをひらく</a></div></div>`;
     }
     const options = areas.towns.map((town) => `<option value="${esc(town.id)}">${esc(town.name)}（${esc(town.base)}エリア）</option>`).join("");
     const markers = data.mapPoints.map((newsPoint) => { const point = projectAreaPoint(newsPoint); return `<g class="svg-event-marker" data-svg-news-point="${esc(newsPoint.id)}" data-map-point-cat="${esc(newsPoint.category)}" transform="translate(${point.svgX} ${point.svgY})" role="button" tabindex="0"><g class="svg-event-marker-inner"><circle class="svg-event-halo" r="12" style="--item-color:${mapPointColor(newsPoint)}"></circle><circle class="svg-event-dot" r="6" style="--item-color:${mapPointColor(newsPoint)}"></circle><text x="13" y="4">${esc(newsPoint.label)}</text></g></g>`; }).join("");
@@ -179,11 +181,11 @@
     ${previewMode ? `<div class="demo-bar">${liveNews ? "PREVIEW　公開ニュースと確認用デモコンテンツを表示しています。" : publicState.mode === "empty" ? "PREVIEW　公開記事は現在0件です。確認用デモコンテンツを表示しています。" : "PREVIEW　掲載情報は画面確認用のデモです。"}</div>` : publicState.mode === "error" ? `<div class="demo-bar">現在、公開情報を取得できません。時間をおいて再度お試しください。</div>` : ""}
     <header class="site-header">
       <div class="shell header-main">
-        <a class="brand" href="#/" aria-label="海老名びより ホーム">
+        <a class="brand" href="/" aria-label="海老名びより ホーム">
           <span><span class="brand-name">海老名びより</span><span class="brand-sub">海老名の変化を、知る。追う。参加する。</span></span>
         </a>
         <nav class="desktop-nav" aria-label="メインナビゲーション">
-          <a href="#/news">ニュース</a><a href="#/map">まちマップ</a><a href="#/followups">その後どうなった？</a><a href="#/tips">情報提供</a><a href="#/feedback">改善要望</a><a href="#/about">このサイトについて</a>
+          <a href="/news">ニュース</a><a href="/map">まちマップ</a><a href="/followups">その後どうなった？</a><a href="/tips">情報提供</a><a href="/feedback">改善要望</a><a href="/about">このサイトについて</a>
         </nav>
         <div class="header-actions">
           <button class="icon-button search-toggle" type="button" aria-label="検索を開く" aria-controls="site-search-dialog" aria-expanded="false">⌕</button>
@@ -191,7 +193,7 @@
         </div>
       </div>
       <nav class="shell mobile-menu" aria-label="モバイルナビゲーション">
-        <a href="#/news">ニュース</a><a href="#/map">まちマップ</a><a href="#/followups">その後どうなった？</a><a href="#/tips">情報提供</a><a href="#/feedback">改善要望</a><a href="#/about">このサイトについて</a>
+        <a href="/news">ニュース</a><a href="/map">まちマップ</a><a href="/followups">その後どうなった？</a><a href="/tips">情報提供</a><a href="/feedback">改善要望</a><a href="/about">このサイトについて</a>
       </nav>
     </header>
     <div class="search-panel" id="site-search-dialog" role="dialog" aria-modal="true" aria-labelledby="site-search-title" aria-hidden="true">
@@ -205,16 +207,16 @@
     <footer class="site-footer">
       <div class="shell">
         <div class="footer-grid">
-          <div class="footer-brand"><a class="brand" href="#/"><span><span class="brand-name">海老名びより</span><span class="brand-sub">海老名の変化を、知る。追う。参加する。</span></span></a><p class="footer-note">${previewMode ? liveNews ? "海老名市公式ではない独立サイトです。公開ニュースに加え、画面確認用のデモコンテンツを表示しています。" : "海老名市公式ではない独立サイトです。プレビューの掲載情報はすべて架空です。" : "海老名市公式ではない独立サイトです。公開情報は情報元と確認日を添えて掲載します。"}</p></div>
-          <div><p class="footer-title">コンテンツ</p><div class="footer-links"><a href="#/news">ニュース一覧</a><a href="#/map">海老名まちマップ</a><a href="#/followups">その後どうなった？</a><a href="#/tips">情報提供</a></div></div>
-          <div><p class="footer-title">サイト運営</p><div class="footer-links"><a href="#/about">このサイトについて</a><a href="#/editorial">編集方針</a><a href="#/feedback">改善要望</a><a href="#/corrections">訂正依頼</a><a href="#/privacy">プライバシーポリシー</a></div></div>
+          <div class="footer-brand"><a class="brand" href="/"><span><span class="brand-name">海老名びより</span><span class="brand-sub">海老名の変化を、知る。追う。参加する。</span></span></a><p class="footer-note">${previewMode ? liveNews ? "海老名市公式ではない独立サイトです。公開ニュースに加え、画面確認用のデモコンテンツを表示しています。" : "海老名市公式ではない独立サイトです。プレビューの掲載情報はすべて架空です。" : "海老名市公式ではない独立サイトです。公開情報は情報元と確認日を添えて掲載します。"}</p></div>
+          <div><p class="footer-title">コンテンツ</p><div class="footer-links"><a href="/news">ニュース一覧</a><a href="/map">海老名まちマップ</a><a href="/followups">その後どうなった？</a><a href="/tips">情報提供</a></div></div>
+          <div><p class="footer-title">サイト運営</p><div class="footer-links"><a href="/about">このサイトについて</a><a href="/editorial">編集方針</a><a href="/feedback">改善要望</a><a href="/corrections">訂正依頼</a><a href="/privacy">プライバシーポリシー</a></div></div>
         </div>
         <div class="copyright">© 2026 海老名びより${previewMode ? "（プレビュー）" : ""}</div>
       </div>
     </footer>`;
 
   const layout = (content) => `${header()}<main id="main-content">${content}</main>${footer()}`;
-  const breadcrumb = (items) => `<div class="shell breadcrumb"><a href="#/">ホーム</a>${items.map((item) => `　/　${item.href ? `<a href="${href(item.href)}">${esc(item.label)}</a>` : esc(item.label)}`).join("")}</div>`;
+  const breadcrumb = (items) => `<div class="shell breadcrumb"><a href="/">ホーム</a>${items.map((item) => `　/　${item.href ? `<a href="${href(item.href)}">${esc(item.label)}</a>` : esc(item.label)}`).join("")}</div>`;
   const pageHero = (eyebrow, title, lead, modifier = "") => `<section class="page-hero ${esc(modifier)}"><div class="shell"><p class="eyebrow">${esc(eyebrow)}</p><h1>${esc(title)}</h1>${lead ? `<p>${esc(lead)}</p>` : ""}</div>${["page-hero--pickup", "page-hero--followups"].includes(modifier) ? `<span class="page-hero-image-note">イメージイラスト／実際の景観・建物配置を示すものではありません</span>` : ""}</section>`;
 
   function homePage() {
@@ -242,12 +244,12 @@
           </div>
         </div>
       </section>
-      <section class="section section--white"><div class="shell"><div class="section-head"><div><p class="eyebrow">CATEGORY</p><h2 class="section-title">カテゴリーから探す</h2></div></div><div class="category-grid">${data.categories.map((c) => `<a class="category-card" href="#/news?category=${c.id}"><span class="category-icon">${c.icon}</span>${c.label}</a>`).join("")}</div></div></section>
+      <section class="section section--white"><div class="shell"><div class="section-head"><div><p class="eyebrow">CATEGORY</p><h2 class="section-title">カテゴリーから探す</h2></div></div><div class="category-grid">${data.categories.map((c) => `<a class="category-card" href="/news?category=${c.id}"><span class="category-icon">${c.icon}</span>${c.label}</a>`).join("")}</div></div></section>
       <section class="section map-home-section"><div class="shell"><div class="section-head"><div><p class="eyebrow">EBINA TOWN MAP</p><h2 class="section-title">海老名まちマップ</h2><p class="section-lead">「何のニュース？」だけでなく、「どこで起きている？」から探せます。</p></div></div>${mapView(true)}</div></section>
-      <section class="section"><div class="shell"><div class="section-head"><div><p class="eyebrow">LATEST NEWS</p><h2 class="section-title">最新ニュース</h2></div><a class="text-link" href="#/news">ニュースをすべて見る →</a></div><div class="news-grid">${latestNews.length ? latestNews.map(newsCard).join("") : `<div class="empty-state"><h2>${data.news.length ? "ほかの公開ニュースはまだありません" : "公開中のニュースはまだありません"}</h2><p>確認が完了した情報から順次掲載します。</p></div>`}</div></div></section>
-      <section class="section section--tint"><div class="shell"><div class="section-head"><div><p class="eyebrow">FOLLOW UP</p><h2 class="section-title">その後、どうなった？</h2><p class="section-lead">発表された計画を、発表時だけで終わらせず時系列で追います。</p></div><a class="text-link" href="#/followups">追跡テーマをすべて見る →</a></div><div class="followup-list">${data.followups.length ? data.followups.slice(0, 4).map(followupRow).join("") : `<div class="empty-state"><h2>公開中の追跡レポートはまだありません</h2><p>継続確認するテーマが決まり次第掲載します。</p></div>`}</div></div></section>
-      <section class="section"><div class="shell"><div class="data-strip"><div class="data-intro"><p class="eyebrow" style="color:#f7ad73">DATA</p><h2>データで見る海老名</h2><p style="font-size:.78rem;color:#d4e4e2">${previewMode ? "現在は確認用プレビューです" : "公開情報をデータベースから取得しています"}</p></div><div class="data-item"><p class="data-value">${data.news.length}件</p><p class="data-label">${previewMode && !liveNews ? "デモニュース" : "公開ニュース"}</p></div><div class="data-item"><p class="data-value">${data.followups.length}件</p><p class="data-label">${previewMode ? "確認用の追跡テーマ" : "公開中の追跡テーマ"}</p></div></div></div></section>
-      <section class="section section--white"><div class="shell"><div class="tip-cta"><div><p class="eyebrow" style="color:#f7ad73">INFORMATION</p><h2>海老名の変化を教えてください</h2><p>工事のお知らせ、開店・閉店、暮らしの変化など。いただいた情報は編集部が確認し、即時公開はしません。</p></div><a class="button button--orange" href="#/tips">情報提供について見る</a></div></div></section>`);
+      <section class="section"><div class="shell"><div class="section-head"><div><p class="eyebrow">LATEST NEWS</p><h2 class="section-title">最新ニュース</h2></div><a class="text-link" href="/news">ニュースをすべて見る →</a></div><div class="news-grid">${latestNews.length ? latestNews.map(newsCard).join("") : `<div class="empty-state"><h2>${data.news.length ? "ほかの公開ニュースはまだありません" : "公開中のニュースはまだありません"}</h2><p>確認が完了した情報から順次掲載します。</p></div>`}</div></div></section>
+      <section class="section section--tint"><div class="shell"><div class="section-head"><div><p class="eyebrow">FOLLOW UP</p><h2 class="section-title">その後、どうなった？</h2><p class="section-lead">発表された計画を、発表時だけで終わらせず時系列で追います。</p></div><a class="text-link" href="/followups">追跡テーマをすべて見る →</a></div><div class="followup-list">${data.followups.length ? data.followups.slice(0, 4).map(followupRow).join("") : `<div class="empty-state"><h2>公開中の追跡レポートはまだありません</h2><p>継続確認するテーマが決まり次第掲載します。</p></div>`}</div></div></section>
+      <section class="section"><div class="shell"><div class="data-strip"><div class="data-intro"><p class="eyebrow" style="color:#f7ad73">DATA</p><h2>データで見る海老名</h2><p style="font-size:.78rem;color:#d4e4e2">${previewMode ? "現在は確認用プレビューです" : "公開情報をデータベースから取得しています"}</p></div><div class="data-item"><p class="data-value">${data.news.length}件</p><p class="data-label">${previewMode && !liveNews ? "デモニュース" : "公開ニュース"}</p></div><div class="data-item"><p class="data-value">${data.followups.length}件</p><p class="data-label">${previewMode && !liveFollowups ? "確認用の追跡テーマ" : "公開中の追跡テーマ"}</p></div></div></div></section>
+      <section class="section section--white"><div class="shell"><div class="tip-cta"><div><p class="eyebrow" style="color:#f7ad73">INFORMATION</p><h2>海老名の変化を教えてください</h2><p>工事のお知らせ、開店・閉店、暮らしの変化など。いただいた情報は編集部が確認し、即時公開はしません。</p></div><a class="button button--orange" href="/tips">情報提供について見る</a></div></div></section>`);
   }
 
   function newsListPage(params) {
@@ -299,7 +301,7 @@
 
   const guideProgressNotice = (areaId, guideArea) => {
     const progress = guideProgressForArea(areaId, guideArea);
-    return `<aside class="public-guide-progress is-${esc(progress.status)}"><div><span>${esc(progress.label)}</span><div><strong>${esc(progress.title)}</strong><p>${esc(progress.message)}</p></div></div><footer>${progress.updated ? `<small>最終更新 ${esc(progress.updated)}</small>` : `<small>制作状況は随時更新します</small>`}<a href="#/tips">この場所も載せてほしい →</a></footer></aside>`;
+    return `<aside class="public-guide-progress is-${esc(progress.status)}"><div><span>${esc(progress.label)}</span><div><strong>${esc(progress.title)}</strong><p>${esc(progress.message)}</p></div></div><footer>${progress.updated ? `<small>最終更新 ${esc(progress.updated)}</small>` : `<small>制作状況は随時更新します</small>`}<a href="/tips">この場所も載せてほしい →</a></footer></aside>`;
   };
 
   function areaDetailPage(id) {
@@ -323,12 +325,12 @@
     const areaNotice = previewMode
       ? liveGuide ? `<strong>案内図の登録場所は編集部の公開データです。</strong> 人口・世帯数は2020年の境界データ、計画など一部の地域情報は確認用表示です。` : `<strong>地域情報はプレビュー表示です。</strong> 地図上の計画や出来事は画面確認用の架空情報です。`
       : liveGuide ? `<strong>案内図の登録場所は編集部の公開データです。</strong> 人口・世帯数は2020年の境界データを使用しています。` : `<strong>基本情報を表示しています。</strong> 人口・世帯数は2020年の境界データを使用しています。`;
-    const related = items.length ? `<div class="area-related-grid">${items.map((item) => `<article class="area-related-card"><div><span class="map-detail-demo">デモデータ</span><span class="status" data-status="${esc(item.status)}">${esc(item.status)}</span></div><p class="eyebrow">${esc(mapItemType(item))}</p><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p>${item.relatedArticles.map((article) => `<a class="text-link" href="${href(article.href)}">${esc(article.label)} →</a>`).join("")}</article>`).join("")}</div>` : `<div class="area-empty"><h2>現在掲載されている情報はありません</h2><p>この町丁目に紐づくニュース、計画、工事、地域課題はまだ登録されていません。</p><a class="button button--orange" href="#/tips">この地域の情報を提供する</a></div>`;
+    const related = items.length ? `<div class="area-related-grid">${items.map((item) => `<article class="area-related-card"><div><span class="map-detail-demo">デモデータ</span><span class="status" data-status="${esc(item.status)}">${esc(item.status)}</span></div><p class="eyebrow">${esc(mapItemType(item))}</p><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p>${item.relatedArticles.map((article) => `<a class="text-link" href="${href(article.href)}">${esc(article.label)} →</a>`).join("")}</article>`).join("")}</div>` : `<div class="area-empty"><h2>現在掲載されている情報はありません</h2><p>この町丁目に紐づくニュース、計画、工事、地域課題はまだ登録されていません。</p><a class="button button--orange" href="/tips">この地域の情報を提供する</a></div>`;
     return layout(`${breadcrumb([{ label: "まちマップ", href: "/map" }, { label: `${props.base}エリア` }, { label: props.name }])}
       <section class="area-detail-hero"><div class="shell"><p class="eyebrow">AREA PROFILE / ${esc(String(props.id))}</p><h1>${esc(props.name)}</h1><p>${esc(props.base)}エリア</p><div class="demo-notice">${areaNotice}</div></div></section>
       <section class="section area-profile-section"><div class="shell area-profile-layout"><div class="area-detail-map-block"><div class="area-detail-map-heading"><p class="eyebrow">PLACE GUIDE</p><h2>${esc(props.name)}の案内絵図</h2><p>${esc(detailMapDescription)}</p>${guideProgressNotice(props.id, guideArea)}${mapModeSwitch}</div><div class="${splitMapLayout ? "guide-map-layout" : ""}"><div class="area-mini-map-wrap"><div id="area-mini-map" class="area-mini-map" data-area-id="${esc(String(props.id))}" data-map-mode="${mapMode}" role="application" aria-label="${esc(props.name)}の${editorialMapActive ? "編集部の手作り案内図" : "通常地図"}"></div><div class="area-mini-loading" data-area-mini-loading>${editorialMapActive ? "手作り案内図" : "通常地図"}を準備しています</div><button class="area-map-fit-button" type="button" data-area-map-fit aria-label="${esc(props.name)}全体を地図に表示する">町丁目全体を表示</button>${editorialMapActive ? `<div class="guide-map-legend" aria-label="手作り案内図の凡例"><span><i class="is-road"></i>主要道路</span><span><i class="is-rail"></i>鉄道</span><span><i class="is-place"></i>登録場所</span></div>` : ""}<small>${esc(detailMapCredit)}</small></div>${guideMapSupplement}</div></div><div class="area-profile-overview"><div class="area-profile-stats"><div><small>人口</small><strong>${Number(props.population || 0).toLocaleString("ja-JP")}人</strong></div><div><small>世帯数</small><strong>${Number(props.households || 0).toLocaleString("ja-JP")}世帯</strong></div><div><small>面積</small><strong>${(areaSqm / 1000000).toFixed(3)} km²</strong><span>${areaSqm.toLocaleString("ja-JP")} m²</span></div><div><small>データ基準年</small><strong>2020年</strong></div></div><div class="area-source-box"><strong>基本情報の情報源</strong><p>国勢調査町丁・字等別境界データセット（2020年）。人口・世帯数・面積は同梱された町丁目境界データの値です。</p><a href="https://geoshape.ex.nii.ac.jp/ka/resource/14215.html" target="_blank" rel="noopener">情報源を確認する →</a></div></div></div></section>
       <section class="section section--white"><div class="shell"><div class="section-head"><div><p class="eyebrow">RELATED UPDATES</p><h2 class="section-title">この地域に関係する情報</h2></div></div>${related}</div></section>
-      <section class="section area-history-section"><div class="shell"><div class="section-head"><div><p class="eyebrow">RECENT ACTIVITY</p><h2 class="section-title">更新履歴・最近の動き</h2></div></div>${recent.length ? `<div class="area-history-list">${recent.map((entry) => `<div><time>${esc(entry.date)}</time><span>${esc(entry.status)}</span><h3>${esc(entry.title)}</h3><p>${esc(entry.note)}</p></div>`).join("")}</div>` : `<p class="map-detail-empty">現在掲載されている更新履歴はありません。</p>`}<div class="area-back-actions"><a class="button" href="#/map" data-map-restore aria-label="直前の表示位置で海老名まちマップに戻る">← 地図に戻る</a><a class="text-link" href="#/tips">この地域の情報を提供する →</a></div></div></section>`);
+      <section class="section area-history-section"><div class="shell"><div class="section-head"><div><p class="eyebrow">RECENT ACTIVITY</p><h2 class="section-title">更新履歴・最近の動き</h2></div></div>${recent.length ? `<div class="area-history-list">${recent.map((entry) => `<div><time>${esc(entry.date)}</time><span>${esc(entry.status)}</span><h3>${esc(entry.title)}</h3><p>${esc(entry.note)}</p></div>`).join("")}</div>` : `<p class="map-detail-empty">現在掲載されている更新履歴はありません。</p>`}<div class="area-back-actions"><a class="button" href="/map" data-map-restore aria-label="直前の表示位置で海老名まちマップに戻る">← 地図に戻る</a><a class="text-link" href="/tips">この地域の情報を提供する →</a></div></div></section>`);
   }
 
   function newsDetailPage(id) {
@@ -337,17 +339,18 @@
     const sourceRows = item.sources?.length ? item.sources : [{ type: item.sourceType, name: item.source, url: item.sourceUrl || "", checkedAt: item.checkedAt }];
     const sourceMarkup = sourceRows.map((source) => `<p><span class="tag tag--source">${esc(source.type)}</span></p><p>${source.url ? `<a href="${esc(source.url)}" target="_blank" rel="noopener">${esc(source.name)} →</a>` : esc(source.name)}${source.checkedAt ? `<br><small class="muted">確認 ${esc(source.checkedAt)}</small>` : ""}</p>`).join("");
     return layout(`${breadcrumb([{ label: "ニュース", href: "/news" }, { label: item.title }])}${pageHero(categoryMap[item.category], item.title, item.excerpt)}
-      <article class="article"><div class="narrow">${liveNews ? "" : `<div class="demo-notice"><strong>デモ情報です</strong><br>この記事は画面確認用の架空情報です。実際の行政・店舗・地域情報として利用しないでください。</div>`}<div class="article-meta"><div class="meta-item"><span class="meta-label">発表日</span>${esc(item.publishedAt)}</div><div class="meta-item"><span class="meta-label">サイトでの最終確認日</span>${esc(item.checkedAt)}</div><div class="meta-item"><span class="meta-label">情報の区分</span>${esc(item.sourceType)}</div><div class="meta-item"><span class="meta-label">カテゴリー</span>${esc(categoryMap[item.category])}</div></div><div class="article-body">${window.EBINA_ARTICLE_FORMAT?.render(Array.isArray(item.body) ? item.body.join("\n\n") : item.body) || item.body.map((p) => `<p>${esc(p)}</p>`).join("")}</div><div class="source-box"><h2>情報元</h2>${sourceMarkup}${liveNews ? "" : `<p class="muted">本番運用では、確認可能な一次情報へのリンクと確認内容を掲載します。</p>`}</div><div class="source-box"><h2>訂正履歴</h2><p class="muted">訂正はありません。訂正が生じた場合は、変更日・変更箇所・理由をここに記録します。</p><a class="text-link" href="#/corrections">訂正を依頼する →</a></div></div></article>`);
+      <article class="article"><div class="narrow">${liveNews ? "" : `<div class="demo-notice"><strong>デモ情報です</strong><br>この記事は画面確認用の架空情報です。実際の行政・店舗・地域情報として利用しないでください。</div>`}<div class="article-meta"><div class="meta-item"><span class="meta-label">発表日</span>${esc(item.publishedAt)}</div><div class="meta-item"><span class="meta-label">サイトでの最終確認日</span>${esc(item.checkedAt)}</div><div class="meta-item"><span class="meta-label">情報の区分</span>${esc(item.sourceType)}</div><div class="meta-item"><span class="meta-label">カテゴリー</span>${esc(categoryMap[item.category])}</div></div><div class="article-body">${window.EBINA_ARTICLE_FORMAT?.render(Array.isArray(item.body) ? item.body.join("\n\n") : item.body) || item.body.map((p) => `<p>${esc(p)}</p>`).join("")}</div><div class="source-box"><h2>情報元</h2>${sourceMarkup}${liveNews ? "" : `<p class="muted">本番運用では、確認可能な一次情報へのリンクと確認内容を掲載します。</p>`}</div><div class="source-box"><h2>訂正履歴</h2><p class="muted">訂正はありません。訂正が生じた場合は、変更日・変更箇所・理由をここに記録します。</p><a class="text-link" href="/corrections">訂正を依頼する →</a></div></div></article>`);
   }
 
   function followupsPage() {
-    return layout(`${pageHero("FOLLOW UP", "その後、どうなった？", "発表された開発や計画の現在地を、状態と時系列で追跡します。", "page-hero--followups")}<section class="section section--tint"><div class="shell"><p class="list-count">追跡テーマ ${data.followups.length}件${previewMode ? "（確認用データ）" : ""}</p><div class="followup-list">${data.followups.length ? data.followups.map(followupRow).join("") : `<div class="empty-state"><h2>公開中の追跡レポートはまだありません</h2><p>継続確認するテーマが決まり次第掲載します。</p></div>`}</div></div></section>`);
+    return layout(`${pageHero("FOLLOW UP", "その後、どうなった？", "発表された開発や計画の現在地を、状態と時系列で追跡します。", "page-hero--followups")}<section class="section section--tint"><div class="shell"><p class="list-count">追跡テーマ ${data.followups.length}件${previewMode && !liveFollowups ? "（確認用データ）" : ""}</p><div class="followup-list">${data.followups.length ? data.followups.map(followupRow).join("") : `<div class="empty-state"><h2>公開中の追跡レポートはまだありません</h2><p>継続確認するテーマが決まり次第掲載します。</p></div>`}</div></div></section>`);
   }
 
   function followupDetailPage(id) {
     const item = data.followups.find((n) => n.id === id);
     if (!item) return notFoundPage();
-    return layout(`${breadcrumb([{ label: "その後、どうなった？", href: "/followups" }, { label: item.title }])}<section class="page-hero"><div class="shell"><p class="eyebrow">${esc(item.category)} / TRACKING</p><div style="margin-bottom:15px">${status(item.status)}</div><h1>${esc(item.title)}</h1><p>${esc(item.summary)}</p></div></section><article class="article"><div class="narrow"><div class="demo-notice"><strong>架空の追跡テーマです。</strong> 実在する計画や進捗ではありません。</div><div class="next-check"><strong>次に確認すること</strong>${esc(item.nextCheck)}<br><span class="muted">サイトでの最終確認：${esc(item.updatedAt)}</span></div><h2>これまでの動き</h2><div class="timeline">${item.timeline.map((entry) => `<div class="timeline-item"><span class="timeline-date">${esc(entry.date)}　/　${esc(entry.status)}</span><h3>${esc(entry.title)}</h3><p>${esc(entry.text)}</p></div>`).join("")}</div><div class="source-box"><h2>状態の見方</h2><p>構想 → 検討中 → 正式決定 → 着工 → 工事中 → 完成を基本に、延期・中止・続報待ちも表示します。発表内容に応じて状態は前後する場合があります。</p></div></div></article>`);
+    const timeline = item.timeline?.length ? item.timeline.map((entry) => `<div class="timeline-item"><span class="timeline-date">${esc(entry.date)}　/　${esc(entry.status)}</span><h3>${entry.href ? `<a href="${href(entry.href)}">${esc(entry.title)}</a>` : esc(entry.title)}</h3><p>${esc(entry.text)}</p></div>`).join("") : `<div class="empty-state"><h3>公開済みの関連記事はまだありません</h3><p>新しい記事がこの追跡テーマに紐づくと、ここへ時系列で追加されます。</p></div>`;
+    return layout(`${breadcrumb([{ label: "その後、どうなった？", href: "/followups" }, { label: item.title }])}<section class="page-hero"><div class="shell"><p class="eyebrow">${esc(item.category)} / TRACKING</p><div style="margin-bottom:15px">${status(item.status)}</div><h1>${esc(item.title)}</h1><p>${esc(item.summary)}</p></div></section><article class="article"><div class="narrow">${liveFollowups ? "" : `<div class="demo-notice"><strong>架空の追跡テーマです。</strong> 実在する計画や進捗ではありません。</div>`}<div class="next-check"><strong>次に確認すること</strong>${esc(item.nextCheck)}<br><span class="muted">サイトでの最終確認：${esc(item.updatedAt)}</span></div><h2>これまでの動き</h2><div class="timeline">${timeline}</div><div class="source-box"><h2>状態の見方</h2><p>構想 → 検討中 → 正式決定 → 着工 → 工事中 → 完成を基本に、延期・中止・続報待ちも表示します。発表内容に応じて状態は前後する場合があります。</p></div></div></article>`);
   }
 
   function issuesPage() {
@@ -361,7 +364,7 @@
   }
 
   const infoPages = {
-    about: ["ABOUT", "このサイトについて", "海老名びよりは、海老名の変化を継続して確認する独立地域メディアです。", `<h2>目指すこと</h2><ol><li>今、海老名で何が起きているか分かる</li><li>過去に発表された開発や計画の、その後が分かる</li><li>将来的に市民プロジェクトへの参加につなげる</li></ol><h2>独立したサイトです</h2><p>海老名市公式ではありません。行政、企業、店舗、団体などから独立した立場で、情報元と確認過程を示します。</p><div class="policy-links"><a class="policy-link" href="#/editorial">編集方針 →</a><a class="policy-link" href="#/privacy">プライバシーポリシー →</a></div>`],
+    about: ["ABOUT", "このサイトについて", "海老名びよりは、海老名の変化を継続して確認する独立地域メディアです。", `<h2>目指すこと</h2><ol><li>今、海老名で何が起きているか分かる</li><li>過去に発表された開発や計画の、その後が分かる</li><li>将来的に市民プロジェクトへの参加につなげる</li></ol><h2>独立したサイトです</h2><p>海老名市公式ではありません。行政、企業、店舗、団体などから独立した立場で、情報元と確認過程を示します。</p><div class="policy-links"><a class="policy-link" href="/editorial">編集方針 →</a><a class="policy-link" href="/privacy">プライバシーポリシー →</a></div>`],
     editorial: ["EDITORIAL POLICY", "編集方針", "信頼できる地域情報のために、確認方法と公開ルールを明らかにします。", `<h2>情報の確認</h2><ul><li>情報元を必ず表示します。</li><li>情報の発表日と、サイトでの最終確認日を分けます。</li><li>行政公式、企業・店舗公式、独自確認、市民提供を区別します。</li><li>不明点や未確認事項は、断定せずその旨を記載します。</li></ul><h2>市民提供情報</h2><p>提供された内容は即時公開しません。公開情報や現地状況を確認し、必要に応じて提供者へ追加確認したうえで編集部が掲載を判断します。</p><h2>画像とコメント</h2><p>写真ではなくイメージイラストを使用する場合は、その旨を画像の近くに明記します。イメージイラストは記事の雰囲気を伝えるためのもので、実際の景観、建物配置、人物、計画内容を示す証拠として使用しません。実在する個人の本人画像と誤認される表現も使用しません。また、コメント欄や自由投稿欄は設けません。</p><h2>訂正</h2><p>誤りが確認された場合は速やかに訂正し、記事内に訂正日、変更内容、理由を記録します。</p>`],
     privacy: ["PRIVACY", "プライバシーポリシー", "情報提供やお問い合わせで預かる情報の扱いを定めます。", `<h2>取得する情報</h2><p>情報提供・訂正依頼・改善要望の内容を取得します。氏名、ニックネーム、連絡先は任意で、匿名でも送信できます。</p><h2>利用目的</h2><ul><li>提供内容の事実確認</li><li>連絡先が入力された場合の追加質問や掲載可否の連絡</li><li>サイト品質の改善</li></ul><h2>公開について</h2><p>提供者の連絡先を本人の同意なく公開しません。提供内容を記事で使用する場合も、個人を特定する情報の扱いを事前に確認します。</p><h2>${previewMode ? "プレビューについて" : "保存と管理"}</h2><p>${previewMode ? "ローカルプレビューでは送信機能を動かさず、入力内容も保存しません。" : "受付情報は事実確認と連絡のために必要な期間だけ保管し、管理者だけが確認できる状態で管理します。"}</p>`],
   };
@@ -381,13 +384,13 @@
       ? `<div class="demo-notice"><strong>プレビュー用フォームです。</strong> 入力内容は送信・保存されません。</div>`
       : submissionReady ? `<div class="form-security-note"><strong>内容は管理画面へ安全に送信されます。</strong><span>送信された情報がそのまま公開されることはありません。</span></div>` : `<div class="demo-notice"><strong>現在、受付機能を準備しています。</strong> 設定完了後に送信できるようになります。</div>`;
     notice = feedback
-      ? `<div class="source-box"><h2>海老名の地域情報はこちら</h2><p>工事、開店・閉店、地域の変化などは情報提供フォームから送信できます。</p><a class="button button--orange" href="#/tips">地域の情報を提供する</a></div>${notice}`
-      : `<div class="source-box"><h2>サイトへの改善要望はこちら</h2><p>使いにくいところや追加してほしい機能は、匿名の改善要望フォームから送信できます。</p><a class="button button--orange" href="#/feedback">改善要望を送る</a></div>${notice}`;
+      ? `<div class="source-box"><h2>海老名の地域情報はこちら</h2><p>工事、開店・閉店、地域の変化などは情報提供フォームから送信できます。</p><a class="button button--orange" href="/tips">地域の情報を提供する</a></div>${notice}`
+      : `<div class="source-box"><h2>サイトへの改善要望はこちら</h2><p>使いにくいところや追加してほしい機能は、匿名の改善要望フォームから送信できます。</p><a class="button button--orange" href="/feedback">改善要望を送る</a></div>${notice}`;
     const categoryOptions = feedback ? ["使いにくい", "追加してほしい", "表示がおかしい", "データの問題", "その他"] : ["開発・工事", "開店・閉店", "交通", "イベント", "暮らし", "その他"];
     const standardFields = `<div class="form-field"><label for="title">${feedback ? "改善要望の件名" : "情報の件名"}</label><input class="form-control" id="title" name="title" minlength="3" maxlength="240" required></div><div class="form-field"><label for="kind">${feedback ? "改善の種類" : "情報の種類"}</label><select class="form-control" id="kind" name="category">${categoryOptions.map((value) => `<option>${value}</option>`).join("")}</select></div>${feedback ? "" : `<div class="form-field"><label for="source-url">確認できるURL</label><input class="form-control" id="source-url" name="sourceUrl" type="url" placeholder="https://" maxlength="1000"><small>公式ページなどがあれば入力してください。</small></div>`}`;
     const messageLabel = correction ? "訂正が必要と思われる内容" : feedback ? "改善してほしい内容" : "提供内容";
     const messageHelp = feedback ? "困った操作や、こうなると使いやすいという内容を具体的に記載してください。" : "場所、日時、確認方法などをできるだけ具体的に記載してください。";
-    return layout(`${pageHero(correction ? "CORRECTION" : feedback ? "FEEDBACK" : "INFORMATION", title, lead)}<section class="article"><div class="narrow">${notice}<div class="form-card"><form data-submission-form data-submission-type="${correction ? "correction" : feedback ? "feedback" : "information"}"><div class="form-field"><label for="name">お名前またはニックネーム（任意）</label><input class="form-control" id="name" name="senderName" autocomplete="name" maxlength="120"><small>匿名で送信できます。</small></div><div class="form-field"><label for="email">連絡先メールアドレス（任意）</label><input class="form-control" id="email" name="senderContact" type="email" autocomplete="email" maxlength="254"><small>返信が必要な場合だけ入力してください。公開しません。</small></div>${correction ? `<div class="form-field"><label for="source-url">対象ページ</label><input class="form-control" id="source-url" name="sourceUrl" type="url" placeholder="https://" maxlength="1000" required></div>` : standardFields}<div class="form-field"><label for="message">${messageLabel}</label><textarea class="form-control" id="message" name="summary" minlength="20" maxlength="3000" required></textarea><small>${messageHelp}</small></div><div class="form-field form-consent"><label><input name="consent" type="checkbox" value="yes" required><span><a href="#/privacy" target="_blank" rel="noopener">プライバシーポリシー</a>を確認し、入力情報の取り扱いに同意します。</span></label></div><div class="submission-trap" aria-hidden="true"><label>ウェブサイト<input name="website" tabindex="-1" autocomplete="off"></label></div>${!previewMode && publicConfig.turnstileSiteKey ? `<div class="submission-turnstile" data-turnstile-container></div><input type="hidden" name="turnstileToken">` : ""}<button class="button" type="submit" ${previewMode && submissionReady ? "" : "disabled"}>${previewMode ? "プレビュー送信を確認" : "内容を送信する"}</button><div class="form-message" data-form-message role="status" aria-live="polite"></div></form></div><div class="source-box"><h2>匿名で送信できます</h2><p>氏名とメールアドレスは任意です。送信内容がそのまま公開されることはありません。</p></div></div></section>`);
+    return layout(`${pageHero(correction ? "CORRECTION" : feedback ? "FEEDBACK" : "INFORMATION", title, lead)}<section class="article"><div class="narrow">${notice}<div class="form-card"><form data-submission-form data-submission-type="${correction ? "correction" : feedback ? "feedback" : "information"}"><div class="form-field"><label for="name">お名前またはニックネーム（任意）</label><input class="form-control" id="name" name="senderName" autocomplete="name" maxlength="120"><small>匿名で送信できます。</small></div><div class="form-field"><label for="email">連絡先メールアドレス（任意）</label><input class="form-control" id="email" name="senderContact" type="email" autocomplete="email" maxlength="254"><small>返信が必要な場合だけ入力してください。公開しません。</small></div>${correction ? `<div class="form-field"><label for="source-url">対象ページ</label><input class="form-control" id="source-url" name="sourceUrl" type="url" placeholder="https://" maxlength="1000" required></div>` : standardFields}<div class="form-field"><label for="message">${messageLabel}</label><textarea class="form-control" id="message" name="summary" minlength="20" maxlength="3000" required></textarea><small>${messageHelp}</small></div><div class="form-field form-consent"><label><input name="consent" type="checkbox" value="yes" required><span><a href="/privacy" target="_blank" rel="noopener">プライバシーポリシー</a>を確認し、入力情報の取り扱いに同意します。</span></label></div><div class="submission-trap" aria-hidden="true"><label>ウェブサイト<input name="website" tabindex="-1" autocomplete="off"></label></div>${!previewMode && publicConfig.turnstileSiteKey ? `<div class="submission-turnstile" data-turnstile-container></div><input type="hidden" name="turnstileToken">` : ""}<button class="button" type="submit" ${previewMode && submissionReady ? "" : "disabled"}>${previewMode ? "プレビュー送信を確認" : "内容を送信する"}</button><div class="form-message" data-form-message role="status" aria-live="polite"></div></form></div><div class="source-box"><h2>匿名で送信できます</h2><p>氏名とメールアドレスは任意です。送信内容がそのまま公開されることはありません。</p></div></div></section>`);
   }
 
   function searchPage(params) {
@@ -436,35 +439,41 @@
     return layout(`${pageHero("SEARCH", "検索結果", q ? `「${q}」の検索結果` : "キーワードを入力してください。")}<section class="section"><div class="shell"><form class="search-form" data-search-form style="max-width:720px;margin-bottom:35px"><input class="search-input" name="q" type="search" value="${esc(q)}" placeholder="ニュース、追跡、町丁目、地図情報を検索" required><button class="button">検索する</button></form>${q ? `<p class="list-count">${matches.length}件見つかりました</p>` : ""}<div class="followup-list">${matches.map((m) => `<a class="followup-row" href="${href(m.url)}"><span class="tag">${esc(m.type)}</span><div><h3>${esc(m.title)}</h3><p>${esc(m.text)}</p></div><span class="arrow">→</span></a>`).join("")}</div>${q && !matches.length ? `<div class="empty-state"><h2>一致する情報がありません</h2><p>言葉を短くするか、複数の言葉を空白で区切ってお試しください。</p></div>` : ""}</div></section>`);
   }
 
-  function notFoundPage() { return layout(`${pageHero("404", "ページが見つかりません", "URLが変わったか、ページが削除された可能性があります。")}<section class="section"><div class="shell"><a class="button" href="#/">ホームへ戻る</a></div></section>`); }
+  function notFoundPage() { return layout(`${pageHero("404", "ページが見つかりません", "URLが変わったか、ページが削除された可能性があります。")}<section class="section"><div class="shell"><a class="button" href="/">ホームへ戻る</a></div></section>`); }
 
   function parseRoute() {
-    const raw = location.hash.slice(1) || "/";
-    const [path, query = ""] = raw.split("?");
-    return { segments: path.split("/").filter(Boolean), params: new URLSearchParams(query) };
+    const parsed = router.parse(location);
+    return { ...router.match(parsed.pathname, issuesEnabled), params: parsed.params };
+  }
+
+  function navigate(path, { replace = false } = {}) {
+    const target = href(path);
+    const current = `${location.pathname}${location.search}${location.hash}`;
+    if (target === current) return;
+    window.history[replace ? "replaceState" : "pushState"]({ ...(window.history.state || {}) }, "", target);
+    render();
   }
 
   function render() {
-    const { segments, params } = parseRoute();
-    if (segments[0] === "areas") {
+    const route = parseRoute();
+    const { params } = route;
+    if (route.name === "area-detail") {
       try { window.history?.replaceState({ ...(window.history.state || {}), ebinaMapRestore: false }, "", window.location.href); } catch (_) { /* history state is optional in file preview */ }
     }
     let html;
-    if (!segments.length) html = homePage();
-    else if (segments[0] === "pickup") html = pickupPage();
-    else if (segments[0] === "news" && segments[1]) html = newsDetailPage(segments[1]);
-    else if (segments[0] === "news") html = newsListPage(params);
-    else if (segments[0] === "map") html = mapPage();
-    else if (segments[0] === "areas" && segments[1]) html = areaDetailPage(segments[1]);
-    else if (segments[0] === "followups" && segments[1]) html = followupDetailPage(segments[1]);
-    else if (segments[0] === "followups") html = followupsPage();
-    else if (issuesEnabled && segments[0] === "issues" && segments[1]) html = issueDetailPage(segments[1]);
-    else if (issuesEnabled && segments[0] === "issues") html = issuesPage();
-    else if (segments[0] === "tips") html = formPage("tips");
-    else if (segments[0] === "feedback") html = formPage("feedback");
-    else if (segments[0] === "corrections") html = formPage("corrections");
-    else if (segments[0] === "search") html = searchPage(params);
-    else if (infoPages[segments[0]]) html = infoPage(segments[0]);
+    if (route.name === "home") html = homePage();
+    else if (route.name === "pickup") html = pickupPage();
+    else if (route.name === "news-detail") html = newsDetailPage(route.id);
+    else if (route.name === "news-list") html = newsListPage(params);
+    else if (route.name === "map") html = mapPage();
+    else if (route.name === "area-detail") html = areaDetailPage(route.id);
+    else if (route.name === "followup-detail") html = followupDetailPage(route.id);
+    else if (route.name === "followups-list") html = followupsPage();
+    else if (route.name === "issue-detail") html = issueDetailPage(route.id);
+    else if (route.name === "issues-list") html = issuesPage();
+    else if (["tips", "feedback", "corrections"].includes(route.name)) html = formPage(route.name);
+    else if (route.name === "search") html = searchPage(params);
+    else if (infoPages[route.name]) html = infoPage(route.name);
     else html = notFoundPage();
     window.ebinaCancelAreaClick?.();
     window.ebinaCancelAreaClick = null;
@@ -532,7 +541,7 @@
     const clientPoint = (x, y, box = state.box) => { const rect = svg.getBoundingClientRect(); return { x: box.x + (x - rect.left) / rect.width * box.width, y: box.y + (y - rect.top) / rect.height * box.height }; };
     const zoomAt = (factor, x = state.box.x + state.box.width / 2, y = state.box.y + state.box.height / 2, animate = true) => { const width = state.box.width * factor; const height = width / ratio; const rx = (x - state.box.x) / state.box.width; const ry = (y - state.box.y) / state.box.height; const target = { x: x - width * rx, y: y - height * ry, width, height }; animate ? animateTo(target) : paint(target); };
     const focusBase = (base) => { const b = areas.baseBounds[base]; if (!b) return; let width = Math.max(145, b.width * 1.55); let height = Math.max(180, b.height * 1.55); if (width / height > ratio) height = width / ratio; else width = height * ratio; animateTo({ x: b.x + b.width / 2 - width / 2, y: b.y + b.height / 2 - height / 2, width, height }); };
-    const openArea = (id) => { state.selectedAreaId = String(id); persist(true); try { history.replaceState({ ...(history.state || {}), ebinaMapRestore: true }, "", location.href); } catch (_) {} location.hash = `/areas/${id}`; };
+    const openArea = (id) => { state.selectedAreaId = String(id); persist(true); try { history.replaceState({ ...(history.state || {}), ebinaMapRestore: true }, "", location.href); } catch (_) {} navigate(`/areas/${id}`); };
     window.ebinaOpenAreaPage = openArea;
     const bindDetail = () => { detail.querySelectorAll("[data-map-point-id]").forEach((button) => button.addEventListener("click", () => showPoint(data.mapPoints.find((point) => point.id === button.dataset.mapPointId)))); detail.querySelector("[data-open-area]")?.addEventListener("click", (event) => openArea(event.currentTarget.dataset.openArea)); };
     const showTown = (town) => {
@@ -582,7 +591,7 @@
     if (mapGeo) return Promise.resolve(mapGeo);
     if (mapGeoLoader) return mapGeoLoader;
     mapGeoLoader = new Promise((resolve, reject) => {
-      const script = document.createElement("script"); script.id = "map-geo-script"; script.src = "./map-geo.js";
+      const script = document.createElement("script"); script.id = "map-geo-script"; script.src = "/map-geo.js";
       script.onload = () => { mapGeo = window.EBINA_MAP_GEO || null; mapGeo ? resolve(mapGeo) : reject(new Error("町丁目の詳細境界データを確認できませんでした")); };
       script.onerror = () => reject(new Error("町丁目の詳細境界データを読み込めませんでした")); document.head.appendChild(script);
     });
@@ -598,12 +607,12 @@
         const link = document.createElement("link");
         link.id = "maplibre-css";
         link.rel = "stylesheet";
-        link.href = "./vendor/maplibre/maplibre-gl.css";
-        const mainStyles = document.querySelector('link[href="./styles.css"]');
+        link.href = "/vendor/maplibre/maplibre-gl.css";
+        const mainStyles = document.querySelector('link[href^="/styles.css"]');
         document.head.insertBefore(link, mainStyles || null);
       }
       const script = document.createElement("script");
-      script.src = "./vendor/maplibre/maplibre-gl.js";
+      script.src = "/vendor/maplibre/maplibre-gl.js";
       script.onload = () => resolve(window.maplibregl);
       script.onerror = () => reject(new Error("地図機能を読み込めませんでした"));
       document.head.appendChild(script);
@@ -704,7 +713,7 @@
       selectedAreaId = String(id);
       writeMapState(currentMapState(true));
       try { window.history?.replaceState({ ...(window.history.state || {}), ebinaMapRestore: true }, "", window.location.href); } catch (_) { /* history state is optional in file preview */ }
-      location.hash = `/areas/${id}`;
+      navigate(`/areas/${id}`);
     };
     window.ebinaOpenAreaPage = openAreaPage;
 
@@ -713,7 +722,7 @@
       const { name, base, population, households } = feature.properties;
       const id = String(feature.id);
       const items = areaItems(id);
-      detail.innerHTML = `<p class="eyebrow">SELECTED AREA</p><span class="map-selected-label">選択中の町丁目</span><h2>${esc(name)}</h2><p class="map-detail-area-name">${esc(base)}エリア　/　ID ${esc(id)}</p><div class="map-area-stats"><div><strong>${Number(population).toLocaleString("ja-JP")}</strong><small>人口（2020年）</small></div><div><strong>${Number(households).toLocaleString("ja-JP")}</strong><small>世帯数（2020年）</small></div><div><strong>${items.length}</strong><small>デモ情報</small></div></div>${items.length ? `<div class="map-area-items"><h3>この地域の情報</h3>${items.map((item) => `<button type="button" data-map-item-id="${item.id}"><span style="--item-color:${mapItemColor(item.status)}"></span><small>${esc(item.status)}</small><strong>${esc(item.title)}</strong></button>`).join("")}</div>` : `<p class="map-detail-empty">現在掲載されている情報はありません。</p>`}<button class="button button--orange map-area-detail-button" type="button" data-open-area="${esc(id)}" aria-label="${esc(name)}の詳細ページを開く">この地域を詳しく見る</button>${!items.length ? `<a class="text-link map-area-tip-link" href="#/tips">この地域の情報を提供する →</a>` : ""}`;
+      detail.innerHTML = `<p class="eyebrow">SELECTED AREA</p><span class="map-selected-label">選択中の町丁目</span><h2>${esc(name)}</h2><p class="map-detail-area-name">${esc(base)}エリア　/　ID ${esc(id)}</p><div class="map-area-stats"><div><strong>${Number(population).toLocaleString("ja-JP")}</strong><small>人口（2020年）</small></div><div><strong>${Number(households).toLocaleString("ja-JP")}</strong><small>世帯数（2020年）</small></div><div><strong>${items.length}</strong><small>デモ情報</small></div></div>${items.length ? `<div class="map-area-items"><h3>この地域の情報</h3>${items.map((item) => `<button type="button" data-map-item-id="${item.id}"><span style="--item-color:${mapItemColor(item.status)}"></span><small>${esc(item.status)}</small><strong>${esc(item.title)}</strong></button>`).join("")}</div>` : `<p class="map-detail-empty">現在掲載されている情報はありません。</p>`}<button class="button button--orange map-area-detail-button" type="button" data-open-area="${esc(id)}" aria-label="${esc(name)}の詳細ページを開く">この地域を詳しく見る</button>${!items.length ? `<a class="text-link map-area-tip-link" href="/tips">この地域の情報を提供する →</a>` : ""}`;
       detail.querySelectorAll("[data-map-item-id]").forEach((button) => button.addEventListener("click", () => showItemDetail(data.mapItems.find((item) => item.id === button.dataset.mapItemId))));
       detail.querySelector("[data-open-area]")?.addEventListener("click", () => openAreaPage(id));
     };
@@ -1126,7 +1135,7 @@
         return [[[west, south], [east, south], [east, north], [west, north], [west, south]]];
       };
       const guidePlaces = (guideArea?.places || []).filter((place) => place.visibility === "published");
-      const placeData = { type: "FeatureCollection", features: guidePlaces.map((place) => ({
+      const placeData = { type: "FeatureCollection", features: guidePlaces.filter((place) => !place.illustrationOnly).map((place) => ({
         type: "Feature",
         id: place.id,
         properties: { id: place.id, name: place.name, type: place.type, status: place.status, shapeType: place.shape.type, fillColor: place.shape.fillColor || "#FFFDF7" },
@@ -1221,15 +1230,17 @@
       const clearGuideSelection = () => {
         const routeSource = map.getSource("guide-route");
         if (routeSource) routeSource.setData(emptyRouteData);
-        if (selectedGuidePlaceId) map.setFeatureState({ source: "guide-places", id: selectedGuidePlaceId }, { selected: false });
+        const selectedPlace = guidePlaces.find((entry) => entry.id === selectedGuidePlaceId);
+        if (selectedGuidePlaceId && !selectedPlace?.illustrationOnly) map.setFeatureState({ source: "guide-places", id: selectedGuidePlaceId }, { selected: false });
         selectedGuidePlaceId = null;
         if (guideDetail) guideDetail.innerHTML = emptyGuideCard();
       };
       const showGuidePlace = (place) => {
         if (!guideArea || !place) return;
-        if (selectedGuidePlaceId && selectedGuidePlaceId !== place.id) map.setFeatureState({ source: "guide-places", id: selectedGuidePlaceId }, { selected: false });
+        const previousPlace = guidePlaces.find((entry) => entry.id === selectedGuidePlaceId);
+        if (selectedGuidePlaceId && selectedGuidePlaceId !== place.id && !previousPlace?.illustrationOnly) map.setFeatureState({ source: "guide-places", id: selectedGuidePlaceId }, { selected: false });
         selectedGuidePlaceId = place.id;
-        map.setFeatureState({ source: "guide-places", id: selectedGuidePlaceId }, { selected: true });
+        if (!place.illustrationOnly) map.setFeatureState({ source: "guide-places", id: selectedGuidePlaceId }, { selected: true });
         const route = guideArea.accessRoutes.find((entry) => entry.id === place.routeId);
         const routeSource = map.getSource("guide-route");
         if (routeSource) routeSource.setData({ type: "FeatureCollection", features: route ? [{ type: "Feature", id: route.id, properties: { id: route.id, name: route.name, color: route.color || "#CF6045", width: Number(route.width || 3) }, geometry: { type: "LineString", coordinates: route.coordinates } }] : [] });
@@ -1240,7 +1251,8 @@
         const relatedArticleMarkup = articles.length ? `<div class="guide-place-articles"><strong>この場所に紐づく関連記事</strong>${articleLinks(articles, "")}</div>` : "";
         const demoLabel = place.status === "demo" ? `<span class="map-detail-demo">デモ登録</span>` : "";
         if (guideDetail) {
-          guideDetail.innerHTML = `<button class="guide-card-close" type="button" data-guide-card-close aria-label="場所の詳細を閉じる">×</button><p class="eyebrow">REGISTERED PLACE</p>${demoLabel}<div class="guide-card-title ${optionalLandmarkAssetFile(place.illustrationPath) ? "has-illustration" : ""}">${optionalLandmarkAssetFile(place.illustrationPath) ? guidePlaceIllustration(place.illustrationPath, place.name) : `<span class="guide-card-icon">${guideIconMarkup(place.type)}</span>`}<h3>${esc(place.name)}</h3></div><p class="guide-place-address">${esc(place.address)}</p><dl class="guide-place-meta"><div><dt>種類</dt><dd>${esc(guidePlaceType[place.type] || place.type)}</dd></div><div><dt>状態</dt><dd>${esc(place.status)}</dd></div><div><dt>最寄り</dt><dd>${esc((place.nearestTransit || []).join("・") || "未設定")}</dd></div></dl><p>${esc(place.accessDescription || "アクセス情報は準備中です。")}</p>${route ? `<div class="guide-route-note"><strong>${esc(route.name)}</strong><span>${esc(route.description || "編集部おすすめの案内経路です。")}</span></div>${route.externalMapUrl ? `<a class="button guide-external-route" href="${esc(route.externalMapUrl)}" target="_blank" rel="noopener">外部地図で経路を開く</a>` : ""}` : ""}${facilityMarkup}${relatedArticleMarkup}`;
+          const showIllustration = place.illustrationOnly && optionalLandmarkAssetFile(place.illustrationPath);
+          guideDetail.innerHTML = `<button class="guide-card-close" type="button" data-guide-card-close aria-label="場所の詳細を閉じる">×</button><p class="eyebrow">REGISTERED PLACE</p>${demoLabel}<div class="guide-card-title ${showIllustration ? "has-illustration" : ""}">${showIllustration ? guidePlaceIllustration(place.illustrationPath, place.name) : `<span class="guide-card-icon">${guideIconMarkup(place.type)}</span>`}<h3>${esc(place.name)}</h3></div><p class="guide-place-address">${esc(place.address)}</p><dl class="guide-place-meta"><div><dt>種類</dt><dd>${esc(guidePlaceType[place.type] || place.type)}</dd></div><div><dt>状態</dt><dd>${esc(place.status)}</dd></div><div><dt>最寄り</dt><dd>${esc((place.nearestTransit || []).join("・") || "未設定")}</dd></div></dl><p>${esc(place.accessDescription || "アクセス情報は準備中です。")}</p>${route ? `<div class="guide-route-note"><strong>${esc(route.name)}</strong><span>${esc(route.description || "編集部おすすめの案内経路です。")}</span></div>${route.externalMapUrl ? `<a class="button guide-external-route" href="${esc(route.externalMapUrl)}" target="_blank" rel="noopener">外部地図で経路を開く</a>` : ""}` : ""}${facilityMarkup}${relatedArticleMarkup}`;
           guideDetail.querySelector("[data-guide-card-close]")?.addEventListener("click", clearGuideSelection);
         }
         map.easeTo({ center: [place.entrancePosition.lng, place.entrancePosition.lat], zoom: Math.max(map.getZoom(), 16.7), duration: 500 });
@@ -1262,14 +1274,15 @@
           guidePlaces.forEach((place) => {
             const element = document.createElement("button");
             element.type = "button";
-            const hasIllustration = Boolean(optionalLandmarkAssetFile(place.illustrationPath));
-            element.className = `guide-map-marker guide-map-marker--place${hasIllustration ? " has-illustration" : ""}${place.status === "demo" ? " is-demo" : ""}${place.labelMode === "interactive" && !hasIllustration ? " is-label-interactive" : ""}`;
+            const hasIllustration = Boolean(place.illustrationOnly && optionalLandmarkAssetFile(place.illustrationPath));
+            element.className = `guide-map-marker guide-map-marker--place${hasIllustration ? " has-illustration" : ""}${place.illustrationOnly ? " is-illustration-only" : ""}${place.status === "demo" ? " is-demo" : ""}${place.labelMode === "interactive" && !hasIllustration ? " is-label-interactive" : ""}`;
             element.innerHTML = hasIllustration ? `<span class="guide-marker-illustration">${guidePlaceIllustration(place.illustrationPath)}</span><span class="guide-marker-name">${esc(place.name)}</span>` : `<span class="guide-marker-icon">${guideIconMarkup(place.type)}</span><span class="guide-marker-name">${esc(place.name)}</span>`;
             element.setAttribute("aria-label", `${place.name}の案内を見る`);
             element.addEventListener("click", () => showGuidePlace(place));
             const savedOffset = Array.isArray(place.labelOffset) && place.labelOffset.some((value) => Number(value) !== 0) ? place.labelOffset.map(Number) : null;
-            const placeOffset = savedOffset || (place.id === "place-vinawalk" ? [46, 25] : place.id === "place-ebina-marui" ? [48, -24] : [42, 25]);
-            new maplibregl.Marker({ element, anchor: "center", offset: placeOffset }).setLngLat([place.entrancePosition.lng, place.entrancePosition.lat]).addTo(map);
+            const placeOffset = place.illustrationOnly ? [0, 0] : savedOffset || (place.id === "place-vinawalk" ? [46, 25] : place.id === "place-ebina-marui" ? [48, -24] : [42, 25]);
+            const position = place.illustrationOnly ? [place.lng, place.lat] : [place.entrancePosition.lng, place.entrancePosition.lat];
+            new maplibregl.Marker({ element, anchor: place.illustrationOnly ? "bottom" : "center", offset: placeOffset }).setLngLat(position).addTo(map);
           });
         }
         requestAnimationFrame(() => {
@@ -1431,8 +1444,8 @@
       requestAnimationFrame(() => panel.querySelector("input")?.focus());
     };
     const homeTownMap = document.querySelector("[data-home-town-map-link]");
-    homeTownMap?.addEventListener("click", (event) => { if (!event.target.closest("a")) location.hash = "/map"; });
-    homeTownMap?.addEventListener("keydown", (event) => { if (event.target === homeTownMap && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); location.hash = "/map"; } });
+    homeTownMap?.addEventListener("click", (event) => { if (!event.target.closest("a")) navigate("/map"); });
+    homeTownMap?.addEventListener("keydown", (event) => { if (event.target === homeTownMap && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); navigate("/map"); } });
     document.querySelectorAll("[data-area-map-mode]").forEach((button) => button.addEventListener("click", () => {
       if (button.classList.contains("is-active")) return;
       const scrollY = window.scrollY;
@@ -1464,8 +1477,8 @@
     });
     const menuButton = document.querySelector(".menu-button");
     menuButton?.addEventListener("click", () => { const menu = document.querySelector(".mobile-menu"); const open = menu.classList.toggle("is-open"); menuButton.setAttribute("aria-expanded", String(open)); });
-    document.querySelectorAll("[data-search-form]").forEach((form) => form.addEventListener("submit", (e) => { e.preventDefault(); const q = new FormData(form).get("q"); location.hash = `/search?q=${encodeURIComponent(q)}`; }));
-    document.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { const category = button.dataset.category; location.hash = category === "all" ? "/news" : `/news?category=${category}`; }));
+    document.querySelectorAll("[data-search-form]").forEach((form) => form.addEventListener("submit", (e) => { e.preventDefault(); const q = new FormData(form).get("q"); navigate(`/search?q=${encodeURIComponent(q)}`); }));
+    document.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { const category = button.dataset.category; navigate(category === "all" ? "/news" : `/news?category=${category}`); }));
     document.querySelectorAll("[data-map-filter]").forEach((button) => button.addEventListener("click", () => {
       const category = button.dataset.mapFilter;
       document.querySelectorAll("[data-map-filter]").forEach((item) => item.classList.toggle("is-active", item === button));
@@ -1484,7 +1497,7 @@
       const id = areaSelect?.value;
       if (!id) { areaSelect?.focus(); return; }
       if (window.ebinaOpenAreaPage) window.ebinaOpenAreaPage(id);
-      else location.hash = `/areas/${id}`;
+      else navigate(`/areas/${id}`);
     };
     document.querySelector("[data-keyboard-area-open]")?.addEventListener("click", openSelectedArea);
     areaSelect?.addEventListener("keydown", (event) => { if (event.key === "Enter" && areaSelect.value) { event.preventDefault(); openSelectedArea(); } });
@@ -1494,6 +1507,19 @@
     initSubmissionForm();
   }
 
-  window.addEventListener("hashchange", render);
+  const legacyTarget = router.legacyHashTarget(location);
+  if (legacyTarget) window.history.replaceState({ ...(window.history.state || {}) }, "", legacyTarget);
+  document.addEventListener("click", (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const anchor = event.target.closest?.("a[href]");
+    if (!anchor || anchor.target || anchor.hasAttribute("download")) return;
+    const rawHref = anchor.getAttribute("href");
+    if (!rawHref || rawHref.startsWith("#")) return;
+    const target = new URL(rawHref, location.href);
+    if (target.origin !== location.origin || !["http:", "https:"].includes(target.protocol)) return;
+    event.preventDefault();
+    navigate(`${target.pathname}${target.search}${target.hash}`);
+  });
+  window.addEventListener("popstate", render);
   render();
 })();

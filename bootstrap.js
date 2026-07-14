@@ -10,7 +10,7 @@
   window.EBINA_DATA = publicBaseData;
   window.EBINA_GUIDE_DATA = publicBaseGuide;
   window.EBINA_CITY_LANDMARKS = fallbackLandmarkData;
-  window.EBINA_PUBLIC_STATE = { mode: previewMode ? "demo" : "empty", previewMode, connected: false, publishedCount: 0, guideConnected: false, publishedGuideCount: 0, landmarksConnected: false, publishedLandmarkCount: fallbackLandmarkData.items?.length || 0, error: null, guideError: null, landmarksError: null };
+  window.EBINA_PUBLIC_STATE = { mode: previewMode ? "demo" : "empty", previewMode, connected: false, publishedCount: 0, followupsConnected: false, publishedFollowupCount: 0, guideConnected: false, publishedGuideCount: 0, landmarksConnected: false, publishedLandmarkCount: fallbackLandmarkData.items?.length || 0, error: null, followupsError: null, guideError: null, landmarksError: null };
 
   const formatDate = (value) => {
     if (!value) return "未設定";
@@ -21,7 +21,7 @@
   const splitBody = (body) => String(body || "").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const loadApp = () => {
     const script = document.createElement("script");
-    script.src = "./app.js?v=persistent-news-points-21";
+    script.src = "/app.js?v=pathname-routing-1";
     document.body.appendChild(script);
   };
 
@@ -90,6 +90,27 @@
     } finally { clearTimeout(timeout); }
   };
 
+  const loadPublishedFollowups = async () => {
+    if (!config.supabaseUrl || !config.supabaseAnonKey) throw new Error("Supabaseの公開設定がありません");
+    const topicParams = new URLSearchParams({
+      select: "id,slug,name,summary,current_status,last_checked_on,next_check_note,updated_at",
+      is_public: "eq.true", deleted_at: "is.null", order: "updated_at.desc",
+    });
+    const timelineParams = new URLSearchParams({
+      select: "topic_id,news_id,slug,title,status,timeline_date,excerpt,updated_at",
+      status: "eq.published", order: "timeline_date.desc",
+    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    try {
+      const topics = await fetchPublicTable("tracking_topics", topicParams, controller.signal);
+      const timeline = await fetchPublicTable("topic_article_timeline", timelineParams, controller.signal).catch((error) => {
+        console.warn("[EBINA UPDATE] 追跡テーマの関連記事を取得できませんでした", error); return [];
+      });
+      return { topics, timeline };
+    } finally { clearTimeout(timeout); }
+  };
+
   const applyPublishedNews = (rows) => {
     const towns = window.EBINA_AREAS?.towns || [];
     const news = rows.map((row) => {
@@ -135,6 +156,33 @@
     });
     const latestCheckedAt = rows.map((row) => row.checked_at).filter(Boolean).sort().at(-1);
     window.EBINA_DATA = { ...publicBaseData, site: { ...fallbackData.site, lastUpdated: formatDate(latestCheckedAt) }, news, mapPoints };
+  };
+
+  const applyPublishedFollowups = ({ topics, timeline }) => {
+    const categoryLabels = Object.fromEntries((fallbackData.categories || []).map((item) => [item.id, item.label]));
+    const newsByDatabaseId = new Map((window.EBINA_DATA?.news || []).map((item) => [String(item.databaseId), item]));
+    const timelineByTopic = new Map();
+    timeline.forEach((row) => {
+      const topicId = String(row.topic_id);
+      if (!timelineByTopic.has(topicId)) timelineByTopic.set(topicId, []);
+      const news = newsByDatabaseId.get(String(row.news_id));
+      timelineByTopic.get(topicId).push({
+        date: formatDate(row.timeline_date), status: "記事公開", title: row.title,
+        text: row.excerpt || news?.excerpt || "関連する記事を公開しました。", href: `/news/${row.slug}`,
+        category: news?.category || "",
+      });
+    });
+    const followups = topics.map((row) => {
+      const entries = timelineByTopic.get(String(row.id)) || [];
+      const firstCategory = entries.find((entry) => entry.category)?.category;
+      return {
+        id: row.slug, databaseId: row.id, title: row.name, status: row.current_status || "構想",
+        category: categoryLabels[firstCategory] || "追跡テーマ", summary: row.summary || "継続して確認しているテーマです。",
+        updatedAt: formatDate(row.last_checked_on || String(row.updated_at || "").slice(0, 10)),
+        nextCheck: row.next_check_note || "次の更新情報を確認中", timeline: entries,
+      };
+    });
+    window.EBINA_DATA = { ...window.EBINA_DATA, followups };
   };
 
   const guidePlaceType = (row) => ({
@@ -198,7 +246,7 @@
           lat: row.entrance_latitude == null ? Number(row.latitude) : Number(row.entrance_latitude),
           lng: row.entrance_longitude == null ? Number(row.longitude) : Number(row.entrance_longitude),
         },
-        shape: publicPlaceShape(row), icon: row.icon || "place", illustrationPath: row.shape_geojson?.properties?.illustrationPath || "", accessDescription: row.access_description || "",
+        shape: publicPlaceShape(row), icon: row.icon || "place", illustrationPath: row.shape_geojson?.properties?.illustrationPath || "", illustrationOnly: Boolean(row.shape_geojson?.properties?.illustrationOnly), accessDescription: row.access_description || "",
         nearestTransit: Array.isArray(row.nearest_transit) ? row.nearest_transit : [],
         relatedNewsIds: relatedNewsByPlace.get(String(row.id)) || [], visibility: "published",
         routeId: firstRoute ? String(firstRoute.id) : null,
@@ -246,22 +294,27 @@
   };
 
   if (appRoot) appRoot.innerHTML = '<main class="public-loading" aria-live="polite">公開記事・案内図・目印を読み込んでいます…</main>';
-  Promise.allSettled([loadPublishedNews(), loadPublishedGuide(), loadPublishedLandmarks()]).then(([newsResult, guideResult, landmarksResult]) => {
+  Promise.allSettled([loadPublishedNews(), loadPublishedFollowups(), loadPublishedGuide(), loadPublishedLandmarks()]).then(([newsResult, followupsResult, guideResult, landmarksResult]) => {
     const newsRows = newsResult.status === "fulfilled" ? newsResult.value : [];
+    const followupRows = followupsResult.status === "fulfilled" ? followupsResult.value.topics : [];
     const landmarkRows = landmarksResult.status === "fulfilled" ? landmarksResult.value : [];
     if (newsResult.status === "fulfilled" && (newsRows.length || !previewMode)) applyPublishedNews(newsRows);
+    if (followupsResult.status === "fulfilled") applyPublishedFollowups(followupsResult.value);
     if (guideResult.status === "fulfilled") applyPublishedGuide(guideResult.value);
     if (landmarksResult.status === "fulfilled" && landmarkRows.length) applyPublishedLandmarks(landmarkRows);
     if (newsResult.status === "rejected") console.error("[EBINA UPDATE] 公開記事の読み込みに失敗しました", newsResult.reason);
+    if (followupsResult.status === "rejected") console.error("[EBINA UPDATE] 公開追跡テーマの読み込みに失敗しました", followupsResult.reason);
     if (guideResult.status === "rejected") console.error("[EBINA UPDATE] 公開案内図の読み込みに失敗しました", guideResult.reason);
     if (landmarksResult.status === "rejected") console.warn("[EBINA UPDATE] 公開目印の読み込みに失敗したため、同梱データを表示します", landmarksResult.reason);
     window.EBINA_PUBLIC_STATE = {
       mode: newsResult.status === "rejected" ? "error" : newsRows.length ? "live" : "empty",
       previewMode,
       connected: newsResult.status === "fulfilled", publishedCount: newsRows.length,
+      followupsConnected: followupsResult.status === "fulfilled", publishedFollowupCount: followupRows.length,
       guideConnected: guideResult.status === "fulfilled", publishedGuideCount: guideResult.status === "fulfilled" ? guideResult.value.places.length : 0,
       landmarksConnected: landmarksResult.status === "fulfilled", publishedLandmarkCount: landmarkRows.length || fallbackLandmarkData.items?.length || 0,
       error: newsResult.status === "rejected" ? newsResult.reason?.message || "公開記事の取得エラー" : null,
+      followupsError: followupsResult.status === "rejected" ? followupsResult.reason?.message || "公開追跡テーマの取得エラー" : null,
       guideError: guideResult.status === "rejected" ? guideResult.reason?.message || "公開案内図の取得エラー" : null,
       landmarksError: landmarksResult.status === "rejected" ? landmarksResult.reason?.message || "公開目印の取得エラー" : null,
     };

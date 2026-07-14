@@ -4,3 +4,4 @@
 !.env.example
 *.log
 .wrangler/
+node_modules/

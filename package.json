@@ -1,0 +1,8 @@
+{
+  "name": "ebina-biyori-public",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "node --check routing.js && node --check app.js && node --check bootstrap.js"
+  }
+}
