@@ -185,7 +185,7 @@
           <span><span class="brand-name">海老名びより</span><span class="brand-sub">海老名の変化を、知る。追う。参加する。</span></span>
         </a>
         <nav class="desktop-nav" aria-label="メインナビゲーション">
-          <a href="/news">ニュース</a><a href="/map">まちマップ</a><a href="/followups">その後どうなった？</a><a href="/tips">情報提供</a><a href="/feedback">改善要望</a><a href="/about">このサイトについて</a>
+          <a href="/news">ニュース</a><a href="/map">まちマップ</a><a href="/followups">その後どうなった？</a><a href="/tips">情報提供</a><a href="/about">このサイトについて</a>
         </nav>
         <div class="header-actions">
           <button class="icon-button search-toggle" type="button" aria-label="検索を開く" aria-controls="site-search-dialog" aria-expanded="false">⌕</button>
@@ -193,7 +193,7 @@
         </div>
       </div>
       <nav class="shell mobile-menu" aria-label="モバイルナビゲーション">
-        <a href="/news">ニュース</a><a href="/map">まちマップ</a><a href="/followups">その後どうなった？</a><a href="/tips">情報提供</a><a href="/feedback">改善要望</a><a href="/about">このサイトについて</a>
+        <a href="/news">ニュース</a><a href="/map">まちマップ</a><a href="/followups">その後どうなった？</a><a href="/tips">情報提供</a><a href="/about">このサイトについて</a>
       </nav>
     </header>
     <div class="search-panel" id="site-search-dialog" role="dialog" aria-modal="true" aria-labelledby="site-search-title" aria-hidden="true">
@@ -385,7 +385,7 @@
       : submissionReady ? `<div class="form-security-note"><strong>内容は管理画面へ安全に送信されます。</strong><span>送信された情報がそのまま公開されることはありません。</span></div>` : `<div class="demo-notice"><strong>現在、受付機能を準備しています。</strong> 設定完了後に送信できるようになります。</div>`;
     notice = feedback
       ? `<div class="source-box"><h2>海老名の地域情報はこちら</h2><p>工事、開店・閉店、地域の変化などは情報提供フォームから送信できます。</p><a class="button button--orange" href="/tips">地域の情報を提供する</a></div>${notice}`
-      : `<div class="source-box"><h2>サイトへの改善要望はこちら</h2><p>使いにくいところや追加してほしい機能は、匿名の改善要望フォームから送信できます。</p><a class="button button--orange" href="/feedback">改善要望を送る</a></div>${notice}`;
+      : notice;
     const categoryOptions = feedback ? ["使いにくい", "追加してほしい", "表示がおかしい", "データの問題", "その他"] : ["開発・工事", "開店・閉店", "交通", "イベント", "暮らし", "その他"];
     const standardFields = `<div class="form-field"><label for="title">${feedback ? "改善要望の件名" : "情報の件名"}</label><input class="form-control" id="title" name="title" minlength="3" maxlength="240" required></div><div class="form-field"><label for="kind">${feedback ? "改善の種類" : "情報の種類"}</label><select class="form-control" id="kind" name="category">${categoryOptions.map((value) => `<option>${value}</option>`).join("")}</select></div>${feedback ? "" : `<div class="form-field"><label for="source-url">確認できるURL</label><input class="form-control" id="source-url" name="sourceUrl" type="url" placeholder="https://" maxlength="1000"><small>公式ページなどがあれば入力してください。</small></div>`}`;
     const messageLabel = correction ? "訂正が必要と思われる内容" : feedback ? "改善してほしい内容" : "提供内容";
