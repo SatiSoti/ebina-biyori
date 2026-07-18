@@ -765,8 +765,6 @@
           { id: "detail-background", type: "raster", source: "gsi-pale", minzoom: 13.6, paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 13.6, 0, 14.4, 0.78], "raster-saturation": -0.5, "raster-contrast": -0.08, "raster-brightness-max": 0.96 } },
           { id: "area-fill", type: "fill", source: "areas", paint: { "fill-color": ["case", ["boolean", ["feature-state", "selected"], false], "#efb37f", ["boolean", ["feature-state", "hover"], false], "#b7d6d1", [">", ["get", "demoCount"], 0], "#d5e5e1", "#ebe9e1"], "fill-opacity": ["interpolate", ["linear"], ["zoom"], 10, ["case", ["boolean", ["feature-state", "selected"], false], 0.5, 0.96], 13.6, ["case", ["boolean", ["feature-state", "selected"], false], 0.25, 0.82], 14.5, ["case", ["boolean", ["feature-state", "selected"], false], 0.08, 0.14]] } },
           { id: "area-line", type: "line", source: "areas", paint: { "line-color": ["interpolate", ["linear"], ["zoom"], 10, ["case", ["boolean", ["feature-state", "selected"], false], "#c94731", "#ffffff"], 13.5, ["case", ["boolean", ["feature-state", "selected"], false], "#c94731", "#d7dad5"], 15, ["case", ["boolean", ["feature-state", "selected"], false], "#c94731", "#1c3966"]], "line-width": ["interpolate", ["linear"], ["zoom"], 10, ["case", ["boolean", ["feature-state", "selected"], false], 3, 1.2], 14, ["case", ["boolean", ["feature-state", "selected"], false], 3.5, 1.5], 16, ["case", ["boolean", ["feature-state", "selected"], false], 4, 2]], "line-opacity": 0.95 } },
-          { id: "city-landmark-halo", type: "circle", source: "city-landmarks", paint: { "circle-color": ["get", "color"], "circle-radius": ["case", ["boolean", ["feature-state", "selected"], false], 18, 13], "circle-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.28, 0.16] } },
-          { id: "city-landmark-points", type: "circle", source: "city-landmarks", paint: { "circle-color": ["get", "color"], "circle-radius": ["case", ["boolean", ["feature-state", "selected"], false], 9, 6], "circle-stroke-color": "#fffef9", "circle-stroke-width": 3 } },
           { id: "item-clusters", type: "circle", source: "items", minzoom: 12.2, filter: ["has", "point_count"], paint: { "circle-color": "#1c3966", "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 50, 23], "circle-stroke-color": "#ffffff", "circle-stroke-width": 3 } },
           { id: "item-halo", type: "circle", source: "items", minzoom: 12.2, filter: ["!", ["has", "point_count"]], paint: { "circle-color": ["get", "color"], "circle-radius": 15, "circle-opacity": 0.18 } },
           { id: "item-points", type: "circle", source: "items", minzoom: 12.2, filter: ["!", ["has", "point_count"]], paint: { "circle-color": ["get", "color"], "circle-radius": ["interpolate", ["linear"], ["zoom"], 12.2, 6, 15, 9], "circle-stroke-color": "#ffffff", "circle-stroke-width": 3 } },
@@ -995,7 +993,7 @@
       };
       window.ebinaCancelAreaClick = cancelAreaClick;
       map.on("click", "area-fill", (event) => {
-        if (map.queryRenderedFeatures(event.point, { layers: ["city-landmark-points", "news-points", "item-points", "item-clusters"] }).length) return;
+        if (map.queryRenderedFeatures(event.point, { layers: ["news-points", "item-points", "item-clusters"] }).length) return;
         if (event.originalEvent?.detail > 1) { cancelAreaClick(); return; }
         const rendered = event.features?.[0];
         const feature = rendered ? areaFeature(rendered.id) : null;
@@ -1012,7 +1010,7 @@
         }, 220);
       });
       map.on("dblclick", "area-fill", (event) => {
-        if (map.queryRenderedFeatures(event.point, { layers: ["city-landmark-points", "news-points", "item-points", "item-clusters"] }).length) return;
+        if (map.queryRenderedFeatures(event.point, { layers: ["news-points", "item-points", "item-clusters"] }).length) return;
         const feature = event.features?.[0];
         if (!feature) return;
         cancelAreaClick();
@@ -1020,13 +1018,6 @@
         event.originalEvent?.preventDefault();
         openAreaPage(feature.id);
       });
-      map.on("click", "city-landmark-points", (event) => {
-        cancelAreaClick();
-        const id = event.features?.[0]?.properties?.id;
-        jumpToLandmark(CITY_LANDMARKS.find((landmark) => landmark.id === id));
-      });
-      map.on("mouseenter", "city-landmark-points", () => { map.getCanvas().style.cursor = "pointer"; });
-      map.on("mouseleave", "city-landmark-points", () => { map.getCanvas().style.cursor = ""; });
       map.on("click", "news-points", (event) => {
         cancelAreaClick();
         setActiveLandmark("");
